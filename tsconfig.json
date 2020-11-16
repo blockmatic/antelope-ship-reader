@@ -1,0 +1,10 @@
+{
+  "extends": "./node_modules/@blockmatic/tsconfig/tsconfig.nodejs.json",
+  "compilerOptions": {
+    "baseUrl": "./src",
+    "rootDirs": ["src/"],
+    "outDir": "dist",
+    "esModuleInterop": true
+  },
+  "exclude": ["node_modules"]
+}

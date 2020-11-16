@@ -1,0 +1,54 @@
+{
+  "name": "@blockmatic/eosio-ship-reader",
+  "version": "1.0.0",
+  "description": "Multi-threaded reactive eosio state reader for NodeJS apps",
+  "main": "index.js",
+  "repository": "git@github.com:blockmatic/eosio-ship-reader.git",
+  "author": "blockmatic.io",
+  "license": "MIT",
+  "private": false,
+  "scripts": {
+    "dev": "env-cmd ts-node-dev --no-deps --respawn examples/index",
+    "build": "tsc",
+    "lint": "eslint --ignore-path .gitignore \"**/*.+(js|ts|tsx)\"",
+    "format": "prettier --ignore-path .gitignore --write \"**/*.+(js|json|ts|tsx)\""
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js}": [
+      "prettier --write",
+      "eslint --fix"
+    ]
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "devDependencies": {
+    "@blockmatic/eslint-config": "^1.3.9",
+    "@blockmatic/prettier-config": "^1.3.1",
+    "@blockmatic/tsconfig": "^1.8.2",
+    "@types/node": "^13.11.1",
+    "@types/text-encoding": "^0.0.35",
+    "@types/ws": "^7.2.7",
+    "env-cmd": "^10.1.0",
+    "eslint": "^6.8.0",
+    "husky": "^4.2.5",
+    "lint-staged": "^10.1.3",
+    "prettier": "^2.0.4",
+    "ts-node-dev": "^1.0.0",
+    "typescript": "^3.8.3"
+  },
+  "dependencies": {
+    "@eosrio/node-abieos": "^2.1.0-beta.0",
+    "eosjs": "^21.0.3",
+    "node-fetch": "^2.6.1",
+    "node-worker-threads-pool": "^1.4.3",
+    "p-queue": "^6.6.2",
+    "rimraf": "^3.0.2",
+    "rxjs": "^6.5.5",
+    "text-encoding": "^0.7.0",
+    "winston": "^3.3.3",
+    "ws": "^7.2.3"
+  }
+}
