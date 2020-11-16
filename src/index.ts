@@ -10,11 +10,11 @@ import {
   ShipBlockResponse,
   EosioShipTickData,
 } from './types'
-import { serialize, deserialize } from './serialize'
+import { serialize } from './serialize'
 import { StaticPool } from 'node-worker-threads-pool'
 import PQueue from 'p-queue'
 
-export const createEosioShipReader = ({ ws_url, request, tick_seconds = 1 }: EosioShipReaderConfig) => {
+export const createEosioShipReader = ({ ws_url, request, tick_seconds = 1, ds_threads }: EosioShipReaderConfig) => {
   // SHiP Subject State
   let socket: WebSocket
   let abi: RpcInterfaces.Abi | null
@@ -23,8 +23,8 @@ export const createEosioShipReader = ({ ws_url, request, tick_seconds = 1 }: Eos
   const lastBlock = 0
   const currentBlock = 0
   const unconfirmedMessages = 0
-  const blocksQueue: PQueue
-  const deserializeWorkers: StaticPool<Array<{ type: string; data: Uint8Array }>, any>
+  const blocksQueue = new PQueue({ concurrency: 1, autoStart: true })
+  // let deserializeWorkers: StaticPool<Array<{ type: string; data: Uint8Array }>, any>
 
   // create rxjs subjects
   const messages$ = new Subject<string>()
@@ -78,18 +78,27 @@ export const createEosioShipReader = ({ ws_url, request, tick_seconds = 1 }: Eos
 
   // SHiP requires acknowledment of received blocks
   const acknowledge = (num_messages: number) => {
-    socket.send(serialize('request', ['get_blocks_ack_request_v0', { num_messages }], types))
+    socket.send(serialize('request', ['get_blocks_ack_request_v0', { num_messages }], types!))
   }
 
   serializedMessages$.subscribe((message: EosioShipSocketMessage) => {
     if (!types) throw new Error('missing types')
-    const serializedData = message as Uint8Array
 
-    // TODO: parellalized serialization
+    // TODO: parellalized deserialization and acknowledgment every 20 or more blocks
+
     // see https://github.com/pinknetworkx/eosio-contract-api/blob/master/src/connections/ship.ts
-    const deserializedData = deserialize('result', serializedData, types)
+    // const serializedData = message as Uint8Array
+    // const deserializedData = deserialize('result', serializedData, types)
+    // deserializeWorkers = new StaticPool({
+    //                 size: ds_threads,
+    //                 task: './build/workers/deserializer.js',
+    //                 workerData: {
+    //                     abi: message,
+    //                     options:{}
+    //                 }
+    //             });
 
-    blocks$.next(deserializedData[1])
+    // blocks$.next({})
   })
 
   return {
