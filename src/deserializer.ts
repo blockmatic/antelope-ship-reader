@@ -2,9 +2,9 @@ import { parentPort, workerData } from 'worker_threads'
 import { TextDecoder, TextEncoder } from 'text-encoding'
 import { Serialize } from 'eosjs'
 import * as nodeAbieos from '@eosrio/node-abieos'
-import { EosioShipTypes, DeserializerOptions, EosioShipSocketMessage } from './types'
+import { EosioShipTypes, DeserializerWorkerOptions, DeserializeParams, EosioShipSocketMessage } from './types'
 
-const deserialize = (type: string, data: Uint8Array | string, abieos: boolean, types: EosioShipTypes) => {
+export const deserialize = ({ type, data, abieos, types }: DeserializeParams) => {
   if (abieos) {
     if (typeof data === 'string') return nodeAbieos.hex_to_json('0', type, data)
     return nodeAbieos.bin_to_json('0', type, Buffer.from(data))
@@ -14,16 +14,14 @@ const deserialize = (type: string, data: Uint8Array | string, abieos: boolean, t
   const buffer = new Serialize.SerialBuffer({ textEncoder: new TextEncoder(), textDecoder: new TextDecoder(), array: dataArray })
   const result = Serialize.getType(types, type).deserialize(buffer, new Serialize.SerializerState({ bytesAsUint8Array: true }))
 
-  if (buffer.readPos !== data.length) {
-    throw new Error(`Deserialization error: ${type}`)
-  }
+  if (buffer.readPos !== data.length) throw new Error(`Deserialization error: ${type}`)
 
   return result
 }
 
 export const parallelDeserializer = () => {
   const args: {
-    options: DeserializerOptions
+    options: DeserializerWorkerOptions
     types: EosioShipTypes
     message: EosioShipSocketMessage
     abi: string
@@ -51,7 +49,7 @@ export const parallelDeserializer = () => {
           return parentPort!.postMessage({ success: false, message: 'Empty data received on deserialize worker' })
         }
 
-        result.push(deserialize(row.type, row.data, abieosSupported, args.types))
+        result.push(deserialize({ type: row.type, data: row.data, abieos: abieosSupported, types: args.types }))
       }
 
       return parentPort!.postMessage({ success: true, data: result })

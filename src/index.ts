@@ -8,12 +8,12 @@ import {
   EosioShipTypes,
   EosioShipSocketMessage,
   ShipBlockResponse,
-  EosioShipTickData,
+  EosioShipReaderTickData,
+  EosioShipReaderInfo,
 } from './types'
 import { serialize } from './serializer'
 import { StaticPool } from 'node-worker-threads-pool'
-import PQueue from 'p-queue'
-import { parallelDeserializer } from 'deserializer'
+import { deserialize, parallelDeserializer } from 'deserializer'
 
 const defaultShipRequest: EosioShipRequest = {
   start_block_num: 0,
@@ -33,16 +33,15 @@ export const createEosioShipReader = ({
   ds_threads,
   ds_experimental,
 }: EosioShipReaderConfig) => {
-  // SHiP Subject State
+  // eosio-ship-reader state
   let socket: WebSocket
   let abi: RpcInterfaces.Abi | null
   let types: EosioShipTypes | null
   let tickIntervalId: NodeJS.Timeout
   let deserializeWorkers: StaticPool<Array<{ type: string; data: Uint8Array }>, any>
   let unconfirmedMessages = 0
-  const lastBlock = 0
-  const currentBlock = 0
-  const blocksQueue = new PQueue({ concurrency: 1, autoStart: true })
+  let lastBlock = 0
+  let currentBlock = 0
   const shipRequest = { ...defaultShipRequest, ...request }
 
   // create rxjs subjects
@@ -52,25 +51,43 @@ export const createEosioShipReader = ({
   const open$ = new Subject<OpenEvent>()
   const blocks$ = new Subject<ShipBlockResponse>()
   const forks$ = new Subject<number>()
-  const tick$ = new Subject<EosioShipTickData>()
+  const tick$ = new Subject<EosioShipReaderTickData>()
+  const info$ = new Subject<EosioShipReaderInfo>()
 
   // create socket connection with nodeos ship and push event data through rx subjects
-  const connect = () => {
+  const connectSocket = () => {
     socket = new WebSocket(ws_url, { perMessageDeflate: false })
     socket.on('open', (e: OpenEvent) => open$.next(e))
     socket.on('close', (e: CloseEvent) => close$.next(e))
     socket.on('error', (e: ErrorEvent) => errors$.next(e))
     socket.on('message', (e: string) => messages$.next(e))
+  }
 
+  // start streaming
+  const start = () => {
+    connectSocket()
     tickIntervalId = setInterval(() => tick$.next({ lastBlock, currentBlock }), tick_seconds * 1000)
   }
 
-  close$.subscribe(() => {
+  // stop streaming
+  const stop = () => {
     socket.removeAllListeners()
     clearInterval(tickIntervalId)
     abi = null
     types = null
-  })
+  }
+
+  // reset eosio-ship-reader state
+  const reset = () => {
+    stop()
+    unconfirmedMessages = 0
+    lastBlock = 0
+    currentBlock = 0
+  }
+
+  // reset state on close
+  // TODO: handle reconnection attempls
+  close$.subscribe(reset)
 
   // filter ship socket messages stream by type (string for abi and )
   const abiMessages$ = messages$.pipe(filter((message: EosioShipSocketMessage) => typeof message === 'string'))
@@ -86,12 +103,13 @@ export const createEosioShipReader = ({
     socket.send(serializedRequest)
   })
 
-  const acknowledge = (num_messages: number) => {}
-
   serializedMessages$.subscribe((message: EosioShipSocketMessage) => {
     if (!types) throw new Error('missing types')
 
-    // TODO: parellalized deserialization
+    const [type, response] = deserialize({ type: 'result', data: message, types })
+
+    if (type !== 'get_blocks_result_v0') info$.next({ message: 'Not supported message received', data: { type, response } })
+
     // deserializeWorkers = new StaticPool({
     //   size: ds_threads,
     //   task: parallelDeserializer,
@@ -100,7 +118,6 @@ export const createEosioShipReader = ({
     //     types,
     //     message,
     //     options: {
-    //       min_block_confirmation: 20,
     //       ds_threads,
     //       ds_experimental,
     //     },
@@ -118,12 +135,14 @@ export const createEosioShipReader = ({
   })
 
   return {
-    connect,
+    start,
+    stop,
     blocks$,
     forks$,
-    tick$,
     open$,
     close$,
     errors$,
+    tick$,
+    info$,
   }
 }

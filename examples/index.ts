@@ -21,7 +21,7 @@ const eosioShipReaderConfig: EosioShipReaderConfig = {
   },
 }
 
-const { connect, blocks$, close$, tick$, errors$, open$ } = createEosioShipReader(eosioShipReaderConfig)
+const { start, blocks$, close$, tick$, errors$, open$ } = createEosioShipReader(eosioShipReaderConfig)
 
 open$.subscribe(() => console.log('connection opened'))
 errors$.subscribe((e: ErrorEvent) => console.log(e))
@@ -47,4 +47,4 @@ tick$.subscribe(({ currentBlock, lastBlock }) => {
   }
 })
 
-connect()
+start()

@@ -24,9 +24,14 @@ export type EosioShipTypes = Map<string, Serialize.Type>
 
 export type EosioShipSocketMessage = string | Uint8Array
 
-export type EosioShipTickData = {
+export interface EosioShipReaderTickData {
   lastBlock: number
   currentBlock: number
+}
+
+export interface EosioShipReaderInfo {
+  message: string
+  data: any
 }
 
 export type ShipBlockData = any
@@ -81,10 +86,15 @@ export interface BlockRequestType {
   fetch_deltas?: boolean
 }
 
-export interface DeserializerOptions {
-  min_block_confirmation: number
+export interface DeserializerWorkerOptions {
   ds_threads: number
   ds_experimental: boolean
+}
+export interface DeserializeParams {
+  type: string
+  data: Uint8Array | string
+  abieos?: boolean
+  types: EosioShipTypes
 }
 
 export type ShipBlockResponse = {
