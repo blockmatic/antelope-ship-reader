@@ -13,7 +13,7 @@ import {
 } from './types'
 import { serialize } from './serializer'
 import { StaticPool } from 'node-worker-threads-pool'
-import { deserialize, parallelDeserializer } from 'deserializer'
+import { deserialize, parallelDeserializer } from './deserializer'
 
 const defaultShipRequest: EosioShipRequest = {
   start_block_num: 0,
