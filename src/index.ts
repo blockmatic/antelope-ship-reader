@@ -10,21 +10,40 @@ import {
   ShipBlockResponse,
   EosioShipTickData,
 } from './types'
-import { serialize } from './serialize'
+import { serialize } from './serializer'
 import { StaticPool } from 'node-worker-threads-pool'
 import PQueue from 'p-queue'
+import { parallelDeserializer } from 'deserializer'
 
-export const createEosioShipReader = ({ ws_url, request, tick_seconds = 1, ds_threads }: EosioShipReaderConfig) => {
+const defaultShipRequest: EosioShipRequest = {
+  start_block_num: 0,
+  end_block_num: 0xffffffff,
+  max_messages_in_flight: 20,
+  have_positions: [],
+  irreversible_only: false,
+  fetch_block: true,
+  fetch_traces: true,
+  fetch_deltas: true,
+}
+
+export const createEosioShipReader = ({
+  ws_url,
+  request,
+  tick_seconds = 1,
+  ds_threads,
+  ds_experimental,
+}: EosioShipReaderConfig) => {
   // SHiP Subject State
   let socket: WebSocket
   let abi: RpcInterfaces.Abi | null
   let types: EosioShipTypes | null
   let tickIntervalId: NodeJS.Timeout
+  let deserializeWorkers: StaticPool<Array<{ type: string; data: Uint8Array }>, any>
+  let unconfirmedMessages = 0
   const lastBlock = 0
   const currentBlock = 0
-  const unconfirmedMessages = 0
   const blocksQueue = new PQueue({ concurrency: 1, autoStart: true })
-  // let deserializeWorkers: StaticPool<Array<{ type: string; data: Uint8Array }>, any>
+  const shipRequest = { ...defaultShipRequest, ...request }
 
   // create rxjs subjects
   const messages$ = new Subject<string>()
@@ -62,41 +81,38 @@ export const createEosioShipReader = ({ ws_url, request, tick_seconds = 1, ds_th
   abiMessages$.subscribe((message: EosioShipSocketMessage) => {
     abi = JSON.parse(message as string) as RpcInterfaces.Abi
     types = Serialize.getTypesFromAbi(Serialize.createInitialTypes(), abi) as EosioShipTypes
-    const defaultShipRequest: EosioShipRequest = {
-      start_block_num: 0,
-      end_block_num: 0xffffffff,
-      max_messages_in_flight: 20,
-      have_positions: [],
-      irreversible_only: false,
-      fetch_block: true,
-      fetch_traces: true,
-      fetch_deltas: true,
-    }
-    const serializedRequest = serialize('request', ['get_blocks_request_v0', { ...defaultShipRequest, ...request }], types)
+
+    const serializedRequest = serialize('request', ['get_blocks_request_v0', shipRequest], types)
     socket.send(serializedRequest)
   })
 
-  // SHiP requires acknowledment of received blocks
-  const acknowledge = (num_messages: number) => {
-    socket.send(serialize('request', ['get_blocks_ack_request_v0', { num_messages }], types!))
-  }
+  const acknowledge = (num_messages: number) => {}
 
   serializedMessages$.subscribe((message: EosioShipSocketMessage) => {
     if (!types) throw new Error('missing types')
 
-    // TODO: parellalized deserialization and acknowledgment every 20 or more blocks
-
-    // see https://github.com/pinknetworkx/eosio-contract-api/blob/master/src/connections/ship.ts
-    // const serializedData = message as Uint8Array
-    // const deserializedData = deserialize('result', serializedData, types)
+    // TODO: parellalized deserialization
     // deserializeWorkers = new StaticPool({
-    //                 size: ds_threads,
-    //                 task: './build/workers/deserializer.js',
-    //                 workerData: {
-    //                     abi: message,
-    //                     options:{}
-    //                 }
-    //             });
+    //   size: ds_threads,
+    //   task: parallelDeserializer,
+    //   workerData: {
+    //     abi,
+    //     types,
+    //     message,
+    //     options: {
+    //       min_block_confirmation: 20,
+    //       ds_threads,
+    //       ds_experimental,
+    //     },
+    //   },
+    // })
+
+    // SHiP requires acknowledment of received blocks
+    unconfirmedMessages += 1
+    if (unconfirmedMessages >= shipRequest.max_messages_in_flight!) {
+      socket.send(serialize('request', ['get_blocks_ack_request_v0', { num_messages: unconfirmedMessages }], types!))
+      unconfirmedMessages = 0
+    }
 
     // blocks$.next({})
   })

@@ -81,7 +81,7 @@ export interface BlockRequestType {
   fetch_deltas?: boolean
 }
 
-export interface IBlockReaderOptions {
+export interface DeserializerOptions {
   min_block_confirmation: number
   ds_threads: number
   ds_experimental: boolean
