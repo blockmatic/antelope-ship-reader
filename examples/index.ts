@@ -1,4 +1,4 @@
-import { EosioShipReaderConfig, ShipBlockResponse } from '../src/types'
+import { EosioShipReaderConfig } from '../src/types'
 import { ErrorEvent } from 'ws'
 import { createEosioShipReader } from '../src'
 import { logger } from './utils/winston'

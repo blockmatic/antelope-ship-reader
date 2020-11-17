@@ -2,7 +2,7 @@ import { parentPort, workerData } from 'worker_threads'
 import { TextDecoder, TextEncoder } from 'text-encoding'
 import { Serialize } from 'eosjs'
 import * as nodeAbieos from '@eosrio/node-abieos'
-import { EosioShipTypes, DeserializerWorkerOptions, DeserializeParams, EosioShipSocketMessage } from './types'
+import { EosioShipTypes, DeserializerWorkerOptions, DeserializeParams } from './types'
 
 export const deserialize = ({ type, data, abieos, types }: DeserializeParams) => {
   if (abieos) {
@@ -23,7 +23,6 @@ export const parallelDeserializer = () => {
   const args: {
     options: DeserializerWorkerOptions
     types: EosioShipTypes
-    message: EosioShipSocketMessage
     abi: string
   } = workerData
 

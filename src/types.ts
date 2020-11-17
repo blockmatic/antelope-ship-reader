@@ -31,7 +31,7 @@ export interface EosioShipReaderTickData {
 
 export interface EosioShipReaderInfo {
   message: string
-  data: any
+  data?: any
 }
 
 export type ShipBlockData = any
