@@ -13,7 +13,7 @@ import {
 } from './types'
 import { serialize } from './serializer'
 import { StaticPool } from 'node-worker-threads-pool'
-import { deserialize, parallelDeserializer } from './deserializer'
+import { deserialize } from './deserializer'
 
 const defaultShipRequest: EosioShipRequest = {
   start_block_num: 0,
@@ -38,8 +38,7 @@ export const createEosioShipReader = ({
   let abi: RpcInterfaces.Abi | null
   let types: EosioShipTypes | null
   let tickIntervalId: NodeJS.Timeout
-  // let deserializationWorkers: StaticPool<Array<{ type: string; data: Uint8Array }>, any>
-  let deserializationWorkers: StaticPool<number, any>
+  let deserializationWorkers: StaticPool<Array<{ type: string; data: Uint8Array }>, any>
   let unconfirmedMessages = 0
   let lastBlock = 0
   let currentBlock = 0
@@ -53,7 +52,7 @@ export const createEosioShipReader = ({
   const open$ = new Subject<OpenEvent>()
   const blocks$ = new Subject<ShipBlockResponse>()
   const forks$ = new Subject<number>()
-  // tODO review tick and info streams, should we call this log$ ?
+  // TODO: review tick and info streams, should we call this log$ ?
   const tick$ = new Subject<EosioShipReaderTickData>()
   const info$ = new Subject<EosioShipReaderInfo>()
 
@@ -102,13 +101,12 @@ export const createEosioShipReader = ({
     abi = JSON.parse(message as string) as RpcInterfaces.Abi
     types = Serialize.getTypesFromAbi(Serialize.createInitialTypes(), abi) as EosioShipTypes
 
-    // initialize deserialization worker threads once abi and types are ready
+    // initialize deserialization worker threads once abi is ready
     deserializationWorkers = new StaticPool({
       size: ds_threads,
-      task: (n) => n + 1,
+      task: './dist/src/deserializer.js',
       workerData: {
         abi,
-        types,
         options: {
           ds_threads,
           ds_experimental,
@@ -122,11 +120,10 @@ export const createEosioShipReader = ({
 
   // handle serialized messages
   const deserializeParallel = async (type: string, data: Uint8Array): Promise<any> => {
-    const result = await deserializationWorkers.exec(1)
-
-    if (result.success) return result.data[0]
-
-    throw new Error(result.message)
+    const result = await deserializationWorkers.exec([{ type, data }])
+    console.log('deserializeParallel', result)
+    if (!result.success) throw new Error(result.message)
+    return result.data[0]
   }
 
   const deserializeDeltas = async (data: Uint8Array): Promise<any> => {

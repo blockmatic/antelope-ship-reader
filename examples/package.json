@@ -9,6 +9,6 @@
   "author": "",
   "license": "ISC",
   "packages": {
-    "@blockmatic/eosio-ship-reader":"file:../"
+    "@blockmatic/eosio-ship-reader": "file:../"
   }
 }

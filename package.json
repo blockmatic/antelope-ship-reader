@@ -10,6 +10,7 @@
   "private": false,
   "scripts": {
     "dev": "ts-node-dev --no-deps --respawn examples/index",
+    "pool": "ts-node-dev --no-deps --respawn examples/pool",
     "build": "tsc",
     "lint": "eslint --ignore-path .gitignore \"**/*.+(js|ts|tsx)\"",
     "format": "prettier --ignore-path .gitignore --write \"**/*.+(js|json|ts|tsx)\"",
