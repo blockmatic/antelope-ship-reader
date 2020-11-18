@@ -86,10 +86,6 @@ export interface BlockRequestType {
   fetch_deltas?: boolean
 }
 
-export interface DeserializerWorkerOptions {
-  ds_threads: number
-  ds_experimental: boolean
-}
 export interface DeserializeParams {
   type: string
   data: Uint8Array | string

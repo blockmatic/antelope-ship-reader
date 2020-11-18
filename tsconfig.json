@@ -7,7 +7,5 @@
     "esModuleInterop": true,
     "skipLibCheck": true
   },
-  "exclude": ["node_modules"],
-  "files": [],
-  "references": [{ "path": "./" }]
+  "exclude": ["node_modules"]
 }

@@ -102,13 +102,13 @@ export const createEosioShipReader = ({
     types = Serialize.getTypesFromAbi(Serialize.createInitialTypes(), abi) as EosioShipTypes
 
     // initialize deserialization worker threads once abi is ready
+    console.log({ ds_threads })
     deserializationWorkers = new StaticPool({
       size: ds_threads,
       task: './dist/src/deserializer.js',
       workerData: {
         abi,
         options: {
-          ds_threads,
           ds_experimental,
         },
       },
@@ -120,6 +120,7 @@ export const createEosioShipReader = ({
 
   // handle serialized messages
   const deserializeParallel = async (type: string, data: Uint8Array): Promise<any> => {
+    console.log('deserializeParallel', deserializationWorkers)
     const result = await deserializationWorkers.exec([{ type, data }])
     console.log('deserializeParallel', result)
     if (!result.success) throw new Error(result.message)

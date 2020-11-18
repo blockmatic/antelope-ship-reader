@@ -2,7 +2,7 @@ import { isMainThread, parentPort, workerData } from 'worker_threads'
 import { TextDecoder, TextEncoder } from 'text-encoding'
 import { RpcInterfaces, Serialize } from 'eosjs'
 import * as nodeAbieos from '@eosrio/node-abieos'
-import { EosioShipTypes, DeserializerWorkerOptions, DeserializeParams } from './types'
+import { EosioShipTypes, DeserializeParams } from './types'
 
 export function deserialize({ type, data, abieos, types }: DeserializeParams) {
   if (abieos) {
@@ -21,9 +21,13 @@ export function deserialize({ type, data, abieos, types }: DeserializeParams) {
 
 console.log({ isMainThread, parentPort, workerData })
 
+if (isMainThread) {
+  console.log('main thread!')
+}
+
 if (parentPort) {
   const args: {
-    options: DeserializerWorkerOptions
+    ds_experimental: boolean
     abi: RpcInterfaces.Abi
   } = workerData
 
@@ -31,7 +35,7 @@ if (parentPort) {
   const eosioTypes = Serialize.getTypesFromAbi(Serialize.createInitialTypes(), args.abi) as EosioShipTypes
 
   let abieosSupported = false
-  if (args.options.ds_experimental) {
+  if (args.ds_experimental) {
     if (!nodeAbieos) {
       throw new Error('C abi deserializer not supported on this platform. Using eosjs instead')
     } else if (!nodeAbieos.load_abi('0', JSON.stringify(args.abi))) {
