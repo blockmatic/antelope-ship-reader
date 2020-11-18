@@ -1,8 +1,8 @@
 import { EosioShipReaderConfig } from '../src/types'
 import { ErrorEvent } from 'ws'
-import { createEosioShipReader } from '../src'
 import { logger } from './utils/winston'
 import { formatSecondsLeft } from './utils/time'
+import { createEosioShipReader } from '../src/index'
 
 const eosioShipReaderConfig: EosioShipReaderConfig = {
   ws_url: 'ws://localhost:8080',
@@ -31,7 +31,7 @@ close$.subscribe(() => console.log('connection closed'))
 
 let lastProcessedBlock: number
 let headBlock: number
-tick$.subscribe(({ currentBlock, lastBlock }) => {
+tick$.subscribe(({ currentBlock, lastBlock }: { currentBlock: number; lastBlock: number }) => {
   const speed = (currentBlock - lastBlock) / eosioShipReaderConfig.tick_seconds
   if (lastBlock === currentBlock && lastBlock > 0) {
     logger.warn('Reader - No blocks processed')

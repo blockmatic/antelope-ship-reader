@@ -2,7 +2,8 @@
   "name": "@blockmatic/eosio-ship-reader",
   "version": "1.0.0",
   "description": "Multi-threaded reactive eosio state reader for NodeJS apps",
-  "main": "index.js",
+  "main": "dist/src/index.js",
+  "types": "dist/src/",
   "repository": "git@github.com:blockmatic/eosio-ship-reader.git",
   "author": "blockmatic.io",
   "license": "MIT",
@@ -11,7 +12,8 @@
     "dev": "ts-node-dev --no-deps --respawn examples/index",
     "build": "tsc",
     "lint": "eslint --ignore-path .gitignore \"**/*.+(js|ts|tsx)\"",
-    "format": "prettier --ignore-path .gitignore --write \"**/*.+(js|json|ts|tsx)\""
+    "format": "prettier --ignore-path .gitignore --write \"**/*.+(js|json|ts|tsx)\"",
+    "dist": "node dist/examples"
   },
   "lint-staged": {
     "*.{ts,tsx,js}": [

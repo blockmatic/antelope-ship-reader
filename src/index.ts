@@ -38,7 +38,8 @@ export const createEosioShipReader = ({
   let abi: RpcInterfaces.Abi | null
   let types: EosioShipTypes | null
   let tickIntervalId: NodeJS.Timeout
-  let deserializationWorkers: StaticPool<Array<{ type: string; data: Uint8Array }>, any>
+  // let deserializationWorkers: StaticPool<Array<{ type: string; data: Uint8Array }>, any>
+  let deserializationWorkers: StaticPool<number, any>
   let unconfirmedMessages = 0
   let lastBlock = 0
   let currentBlock = 0
@@ -95,7 +96,7 @@ export const createEosioShipReader = ({
   const abiMessages$ = messages$.pipe(filter((message: EosioShipSocketMessage) => typeof message === 'string'))
   const serializedMessages$ = messages$.pipe(filter((message: EosioShipSocketMessage) => typeof message !== 'string')) // Uint8Array?
 
-  // ship sends the abi as string on first message, we need to get the SHiP types from it
+  // ship sends the abi as string on first message, we need to get the ship types from it
   // types are necessary to deserialize subsequent messages
   abiMessages$.subscribe((message: EosioShipSocketMessage) => {
     abi = JSON.parse(message as string) as RpcInterfaces.Abi
@@ -104,7 +105,7 @@ export const createEosioShipReader = ({
     // initialize deserialization worker threads once abi and types are ready
     deserializationWorkers = new StaticPool({
       size: ds_threads,
-      task: parallelDeserializer,
+      task: (n) => n + 1,
       workerData: {
         abi,
         types,
@@ -121,7 +122,7 @@ export const createEosioShipReader = ({
 
   // handle serialized messages
   const deserializeParallel = async (type: string, data: Uint8Array): Promise<any> => {
-    const result = await deserializationWorkers.exec([{ type, data }])
+    const result = await deserializationWorkers.exec(1)
 
     if (result.success) return result.data[0]
 
