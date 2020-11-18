@@ -48,7 +48,8 @@ export const parallelDeserializer = () => {
           return parentPort!.postMessage({ success: false, message: 'Empty data received on deserialize worker' })
         }
 
-        result.push(deserialize({ type: row.type, data: row.data, abieos: abieosSupported, types: args.types }))
+        // result.push(deserialize({ type: row.type, data: row.data, abieos: abieosSupported, types: args.types }))
+        result.push({})
       }
 
       return parentPort!.postMessage({ success: true, data: result })
