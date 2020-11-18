@@ -52,6 +52,7 @@ export const createEosioShipReader = ({
   const open$ = new Subject<OpenEvent>()
   const blocks$ = new Subject<ShipBlockResponse>()
   const forks$ = new Subject<number>()
+  // tODO review tick and info streams, should we call this log$ ?
   const tick$ = new Subject<EosioShipReaderTickData>()
   const info$ = new Subject<EosioShipReaderInfo>()
 
@@ -94,7 +95,7 @@ export const createEosioShipReader = ({
   const abiMessages$ = messages$.pipe(filter((message: EosioShipSocketMessage) => typeof message === 'string'))
   const serializedMessages$ = messages$.pipe(filter((message: EosioShipSocketMessage) => typeof message !== 'string')) // Uint8Array?
 
-  // SHiP sends the abi as string on first message, we need to get the SHiP types from it
+  // ship sends the abi as string on first message, we need to get the SHiP types from it
   // types are necessary to deserialize subsequent messages
   abiMessages$.subscribe((message: EosioShipSocketMessage) => {
     abi = JSON.parse(message as string) as RpcInterfaces.Abi
@@ -118,7 +119,7 @@ export const createEosioShipReader = ({
     socket.send(serializedRequest)
   })
 
-  // Handle serialized messages
+  // handle serialized messages
   const deserializeParallel = async (type: string, data: Uint8Array): Promise<any> => {
     const result = await deserializationWorkers.exec([{ type, data }])
 
@@ -166,68 +167,71 @@ export const createEosioShipReader = ({
   serializedMessages$.subscribe(async (message: EosioShipSocketMessage) => {
     if (!types) throw new Error('missing types')
 
-    // TODO: overall error handling with try/catch
+    try {
+      // deserialize eosio ship message
+      const [type, response] = deserialize({ type: 'result', data: message, types })
 
-    // deserialize eosio ship message
-    const [type, response] = deserialize({ type: 'result', data: message, types })
+      // return and provide info in these cases.
+      // TODO: validate is not necessary to update state in these cases
+      if (type !== 'get_blocks_result_v0') {
+        info$.next({ message: 'Not supported message received', data: { type, response } })
+        return
+      }
 
-    // return and provide info in these cases.
-    // TODO: validate is not necessary to update state in these cases
-    if (type !== 'get_blocks_result_v0') {
-      info$.next({ message: 'Not supported message received', data: { type, response } })
-      return
+      if (!response?.this_block) {
+        info$.next({ message: 'this_block is missing in eosio ship response' })
+        return
+      }
+
+      // deserialize blocks, transaction traces and table deltas
+      let block: any = null
+      let traces: any = []
+      let deltas: any = []
+
+      if (response.block) {
+        block = await deserializeParallel('signed_block', response.block)
+      } else if (shipRequest.fetch_block) {
+        info$.next({ message: `Block #${response.this_block.block_num} does not contain block data` })
+      }
+
+      if (response.traces) {
+        traces = await deserializeParallel('transaction_trace[]', response.traces)
+      } else if (shipRequest.fetch_traces) {
+        info$.next({ message: `Block #${response.this_block.block_num} does not contain trace data` })
+      }
+
+      if (response.deltas) {
+        deltas = await deserializeDeltas(response.deltas)
+      } else if (shipRequest.fetch_deltas) {
+        info$.next({ message: `Block #${response.this_block.block_num} does not contain delta data` })
+      }
+
+      // ship requires acknowledgement of received blocks
+      unconfirmedMessages += 1
+      if (unconfirmedMessages >= shipRequest.max_messages_in_flight!) {
+        socket.send(serialize('request', ['get_blocks_ack_request_v0', { num_messages: unconfirmedMessages }], types!))
+        unconfirmedMessages = 0
+      }
+
+      // send block data thru the rxjs subject
+      blocks$.next({
+        this_block: response.this_block,
+        head: response.head,
+        last_irreversible: response.last_irreversible,
+        prev_block: response.prev_block,
+        block: Object.assign(
+          { ...response.this_block },
+          block,
+          { last_irreversible: response.last_irreversible },
+          { head: response.head },
+        ),
+        traces,
+        deltas,
+      })
+    } catch (error) {
+      errors$.next(error)
+      stop()
     }
-
-    if (!response?.this_block) {
-      info$.next({ message: 'this_block is missing in eosio ship response' })
-      return
-    }
-
-    // deserialize blocks, transaction traces and table deltas
-    let block: any = null
-    let traces: any = []
-    let deltas: any = []
-
-    if (response.block) {
-      block = await deserializeParallel('signed_block', response.block)
-    } else if (shipRequest.fetch_block) {
-      info$.next({ message: `Block #${response.this_block.block_num} does not contain block data` })
-    }
-
-    if (response.traces) {
-      traces = await deserializeParallel('transaction_trace[]', response.traces)
-    } else if (shipRequest.fetch_traces) {
-      info$.next({ message: `Block #${response.this_block.block_num} does not contain trace data` })
-    }
-
-    if (response.deltas) {
-      deltas = await deserializeDeltas(response.deltas)
-    } else if (shipRequest.fetch_deltas) {
-      info$.next({ message: `Block #${response.this_block.block_num} does not contain delta data` })
-    }
-
-    // ship requires acknowledment of received blocks
-    unconfirmedMessages += 1
-    if (unconfirmedMessages >= shipRequest.max_messages_in_flight!) {
-      socket.send(serialize('request', ['get_blocks_ack_request_v0', { num_messages: unconfirmedMessages }], types!))
-      unconfirmedMessages = 0
-    }
-
-    // send block data thru the rxjs subject
-    blocks$.next({
-      this_block: response.this_block,
-      head: response.head,
-      last_irreversible: response.last_irreversible,
-      prev_block: response.prev_block,
-      block: Object.assign(
-        { ...response.this_block },
-        block,
-        { last_irreversible: response.last_irreversible },
-        { head: response.head },
-      ),
-      traces,
-      deltas,
-    })
   })
 
   // eosio-ship-reader api
