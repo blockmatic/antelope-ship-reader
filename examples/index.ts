@@ -1,4 +1,4 @@
-import { EosioShipReaderConfig } from '../src/types'
+import { EosioShipReaderConfig, ShipBlockResponse } from '../src/types'
 import { ErrorEvent } from 'ws'
 import { logger } from './utils/winston'
 import { formatSecondsLeft } from './utils/time'
@@ -26,25 +26,28 @@ const { start, blocks$, close$, tick$, errors$, open$ } = createEosioShipReader(
 open$.subscribe(() => console.log('connection opened'))
 errors$.subscribe((e: ErrorEvent) => console.log(e))
 
-blocks$.subscribe(() => console.log('block recieved opened'))
+blocks$.subscribe((blockData: ShipBlockResponse) => {
+  const { this_block, last_irreversible, head, prev_block, block, traces, deltas } = blockData
+  console.log(this_block.block_num)
+})
 close$.subscribe(() => console.log('connection closed'))
 
-let lastProcessedBlock: number
-let headBlock: number
-tick$.subscribe(({ currentBlock, lastBlock }: { currentBlock: number; lastBlock: number }) => {
-  const speed = (currentBlock - lastBlock) / eosioShipReaderConfig.tick_seconds
-  if (lastBlock === currentBlock && lastBlock > 0) {
-    logger.warn('Reader - No blocks processed')
-  } else if (currentBlock < lastProcessedBlock) {
-    logger.info(
-      `Reader Progress: ${currentBlock} / ${headBlock} ` +
-        `(${((100 * currentBlock) / headBlock).toFixed(2)}%) ` +
-        `Speed: ${speed.toFixed(1)} B/s ` +
-        `(Syncs ${formatSecondsLeft(Math.floor((headBlock - currentBlock) / speed))})`,
-    )
-  } else {
-    logger.info(`Reader Current Block: ${currentBlock} Speed: ${speed.toFixed(1)} B/s `)
-  }
-})
+// let lastProcessedBlock: number
+// let headBlock: number
+// tick$.subscribe(({ currentBlock, lastBlock }: { currentBlock: number; lastBlock: number }) => {
+//   const speed = (currentBlock - lastBlock) / eosioShipReaderConfig.tick_seconds
+//   if (lastBlock === currentBlock && lastBlock > 0) {
+//     logger.warn('Reader - No blocks processed')
+//   } else if (currentBlock < lastProcessedBlock) {
+//     logger.info(
+//       `Reader Progress: ${currentBlock} / ${headBlock} ` +
+//         `(${((100 * currentBlock) / headBlock).toFixed(2)}%) ` +
+//         `Speed: ${speed.toFixed(1)} B/s ` +
+//         `(Syncs ${formatSecondsLeft(Math.floor((headBlock - currentBlock) / speed))})`,
+//     )
+//   } else {
+//     logger.info(`Reader Current Block: ${currentBlock} Speed: ${speed.toFixed(1)} B/s `)
+//   }
+// })
 
 start()

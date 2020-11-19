@@ -19,19 +19,12 @@ export function deserialize({ type, data, abieos, types }: DeserializeParams) {
   return result
 }
 
-console.log({ isMainThread, parentPort, workerData })
-
-if (isMainThread) {
-  console.log('main thread!')
-}
-
 if (parentPort) {
   const args: {
     ds_experimental: boolean
     abi: RpcInterfaces.Abi
   } = workerData
 
-  console.log({ workerData })
   const eosioTypes = Serialize.getTypesFromAbi(Serialize.createInitialTypes(), args.abi) as EosioShipTypes
 
   let abieosSupported = false
@@ -46,7 +39,6 @@ if (parentPort) {
   }
 
   parentPort.on('message', (param: Array<{ type: string; data: Uint8Array | string }>) => {
-    console.log('parentPort on message')
     try {
       const result = <any>[]
 
