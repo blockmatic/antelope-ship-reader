@@ -14,7 +14,6 @@ export interface EosioShipRequest {
 
 export interface EosioShipReaderConfig {
   ws_url: string
-  tick_seconds: number
   ds_threads: number
   ds_experimental: boolean
   request: EosioShipRequest
@@ -23,11 +22,6 @@ export interface EosioShipReaderConfig {
 export type EosioShipTypes = Map<string, Serialize.Type>
 
 export type EosioShipSocketMessage = string | Uint8Array
-
-export interface EosioShipReaderTickData {
-  lastBlock: number
-  currentBlock: number
-}
 
 export interface EosioShipReaderInfo {
   message: string
@@ -41,8 +35,6 @@ export declare type EosTable = {
   scope: string
   table: string
 }
-
-// ==============================
 
 export type EosioAction<T = { [key: string]: any } | string> = {
   account: string

@@ -1,4 +1,4 @@
-import { isMainThread, parentPort, workerData } from 'worker_threads'
+import { parentPort, workerData } from 'worker_threads'
 import { TextDecoder, TextEncoder } from 'text-encoding'
 import { RpcInterfaces, Serialize } from 'eosjs'
 import * as nodeAbieos from '@eosrio/node-abieos'

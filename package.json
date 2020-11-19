@@ -45,7 +45,7 @@
     "eosjs": "^21.0.3",
     "node-fetch": "^2.6.1",
     "node-worker-threads-pool": "^1.4.3",
-    "rimraf": "^3.0.2",
+    "p-queue": "^6.6.2",
     "rxjs": "^6.6.3",
     "text-encoding": "^0.7.0",
     "winston": "^3.3.3",

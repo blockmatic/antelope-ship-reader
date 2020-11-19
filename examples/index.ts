@@ -8,7 +8,6 @@ const eosioShipReaderConfig: EosioShipReaderConfig = {
   ws_url: 'ws://localhost:8080',
   ds_threads: 4,
   ds_experimental: false,
-  tick_seconds: 1,
   request: {
     start_block_num: 152774818,
     end_block_num: 0xffffffff,
@@ -21,15 +20,15 @@ const eosioShipReaderConfig: EosioShipReaderConfig = {
   },
 }
 
-const { start, blocks$, close$, tick$, errors$, open$ } = createEosioShipReader(eosioShipReaderConfig)
+const { start, blocks$, close$, errors$ } = createEosioShipReader(eosioShipReaderConfig)
 
-open$.subscribe(() => console.log('connection opened'))
 errors$.subscribe((e: ErrorEvent) => console.log(e))
 
 blocks$.subscribe((blockData: ShipBlockResponse) => {
   const { this_block, last_irreversible, head, prev_block, block, traces, deltas } = blockData
   console.log(this_block.block_num)
 })
+
 close$.subscribe(() => console.log('connection closed'))
 
 // let lastProcessedBlock: number
