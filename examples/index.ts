@@ -1,11 +1,11 @@
 import { EosioShipReaderConfig, ShipBlockResponse } from '../src/types'
 import { ErrorEvent } from 'ws'
 import { createEosioShipReader } from '../src/index'
-import fetch from 'node-fetch'
+// import fetch from 'node-fetch'
 
 const initReader = async () => {
-  const info = await fetch('http://127.0.0.1:8888/v1/chain/get_info').then((res) => res.json())
-  console.log(info)
+  // const info = await fetch('http://127.0.0.1:8888/v1/chain/get_info').then((res) => res.json())
+  // console.log(info)
   const eosioShipReaderConfig: EosioShipReaderConfig = {
     ws_url: 'ws://localhost:8080',
     ds_threads: 4,
