@@ -42,6 +42,7 @@
   },
   "dependencies": {
     "@eosrio/node-abieos": "^2.1.0-beta.0",
+    "@types/node-fetch": "^2.5.7",
     "eosjs": "^21.0.3",
     "node-fetch": "^2.6.1",
     "node-worker-threads-pool": "^1.4.3",
