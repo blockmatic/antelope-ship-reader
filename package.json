@@ -1,6 +1,6 @@
 {
   "name": "@blockmatic/eosio-ship-reader",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "Multi-threaded reactive eosio state reader for NodeJS apps",
   "main": "dist/src/index.js",
   "types": "dist/src/",
