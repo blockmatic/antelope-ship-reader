@@ -17,6 +17,7 @@ export interface EosioShipReaderConfig {
   ds_threads: number
   ds_experimental: boolean
   request: EosioShipRequest
+  deltaWhitelist: string[]
 }
 
 export type EosioShipTypes = Map<string, Serialize.Type>

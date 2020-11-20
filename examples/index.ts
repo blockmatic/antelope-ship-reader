@@ -11,13 +11,14 @@ const initReader = async () => {
     ws_url: 'ws://localhost:8080',
     ds_threads: 4,
     ds_experimental: false,
+    deltaWhitelist: [],
     request: {
       start_block_num: info.head_block_num,
       end_block_num: 0xffffffff,
       max_messages_in_flight: 50,
       have_positions: [],
       irreversible_only: false,
-      fetch_block: true,s
+      fetch_block: true,
       fetch_traces: true,
       fetch_deltas: true,
     },

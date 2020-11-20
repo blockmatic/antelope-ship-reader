@@ -26,7 +26,13 @@ const defaultShipRequest: EosioShipRequest = {
   fetch_deltas: true,
 }
 
-export const createEosioShipReader = ({ ws_url, request, ds_threads, ds_experimental }: EosioShipReaderConfig) => {
+export const createEosioShipReader = ({
+  ws_url,
+  request,
+  ds_threads,
+  ds_experimental,
+  deltaWhitelist,
+}: EosioShipReaderConfig) => {
   // eosio-ship-reader state
   let socket: WebSocket
   let abi: RpcInterfaces.Abi | null
@@ -37,7 +43,6 @@ export const createEosioShipReader = ({ ws_url, request, ds_threads, ds_experime
   let currentBlock = 0
   const blocksQueue = new PQueue({ concurrency: 1 })
   const shipRequest = { ...defaultShipRequest, ...request }
-  const deltaWhitelist: string[] = []
 
   // create rxjs subjects
   const messages$ = new Subject<string>()
@@ -46,7 +51,7 @@ export const createEosioShipReader = ({ ws_url, request, ds_threads, ds_experime
   const open$ = new Subject<OpenEvent>()
   const blocks$ = new Subject<ShipBlockResponse>()
   const forks$ = new Subject<number>()
-  const info$ = new Subject<EosioShipReaderInfo>()
+  const log$ = new Subject<EosioShipReaderInfo>()
 
   // create socket connection with nodeos ship and push event data through rx subjects
   const connectSocket = () => {
@@ -111,7 +116,7 @@ export const createEosioShipReader = ({ ws_url, request, ds_threads, ds_experime
     socket.send(serializedRequest)
   })
 
-  // handle serialized messages
+  // ------------------ handle deserialization --------------------
   const deserializeParallel = async (type: string, data: Uint8Array): Promise<any> => {
     const result = await deserializationWorkers.exec([{ type, data }])
     if (!result.success) throw new Error(result.message)
@@ -159,15 +164,13 @@ export const createEosioShipReader = ({ ws_url, request, ds_threads, ds_experime
 
     const [type, response] = deserialize({ type: 'result', data: message, types })
 
-    // return and provide info in these cases.
-    // TODO: validate is not necessary to update state in these cases
     if (type !== 'get_blocks_result_v0') {
-      info$.next({ message: 'Not supported message received', data: { type, response } })
+      log$.next({ message: 'Not supported message received', data: { type, response } })
       return
     }
 
     if (!response?.this_block) {
-      info$.next({ message: 'this_block is missing in eosio ship response' })
+      log$.next({ message: 'this_block is missing in eosio ship response' })
       return
     }
     // deserialize blocks, transaction traces and table deltas
@@ -178,19 +181,19 @@ export const createEosioShipReader = ({ ws_url, request, ds_threads, ds_experime
     if (response.block) {
       block = await deserializeParallel('signed_block', response.block)
     } else if (shipRequest.fetch_block) {
-      info$.next({ message: `Block #${response.this_block.block_num} does not contain block data` })
+      log$.next({ message: `Block #${response.this_block.block_num} does not contain block data` })
     }
 
     if (response.traces) {
       traces = await deserializeParallel('transaction_trace[]', response.traces)
     } else if (shipRequest.fetch_traces) {
-      info$.next({ message: `Block #${response.this_block.block_num} does not contain trace data` })
+      log$.next({ message: `Block #${response.this_block.block_num} does not contain trace data` })
     }
 
     if (response.deltas) {
       deltas = await deserializeDeltas(response.deltas)
     } else if (shipRequest.fetch_deltas) {
-      info$.next({ message: `Block #${response.this_block.block_num} does not contain delta data` })
+      log$.next({ message: `Block #${response.this_block.block_num} does not contain delta data` })
     }
 
     const blockData: ShipBlockResponse = {
@@ -237,6 +240,6 @@ export const createEosioShipReader = ({ ws_url, request, ds_threads, ds_experime
     open$,
     close$,
     errors$,
-    info$,
+    log$,
   }
 }
