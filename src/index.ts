@@ -100,7 +100,7 @@ export const createEosioShipReader = ({
     types = Serialize.getTypesFromAbi(Serialize.createInitialTypes(), abi) as EosioShipTypes
 
     // initialize deserialization worker threads once abi is ready
-    console.log({ ds_threads })
+    log$.next({ message: 'Initializing deserialization worker pool', data: { ds_threads } })
     deserializationWorkers = new StaticPool({
       size: ds_threads,
       task: './dist/src/deserializer.js',
@@ -217,6 +217,7 @@ export const createEosioShipReader = ({
   serializedMessages$.subscribe(async (message: EosioShipSocketMessage) => {
     try {
       // deserialize eosio ship message
+      // TODO: review if this is affecting parallelization, this is helping with block ordering
       blocksQueue.add(async () => deserializeMessage(message))
 
       // ship requires acknowledgement of received blocks
