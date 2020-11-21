@@ -40,7 +40,8 @@ const initReader = async () => {
     const { this_block, last_irreversible, head, prev_block, block, traces, deltas } = blockData
 
     console.log(this_block.block_num)
-    process.exit(1)
+
+    // block.transactions?.map(console.log)
   })
 
   close$.subscribe(() => console.log('connection closed'))
