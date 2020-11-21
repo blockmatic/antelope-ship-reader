@@ -17,7 +17,7 @@ export interface EosioShipReaderConfig {
   ds_threads: number
   ds_experimental: boolean
   request: EosioShipRequest
-  deltaWhitelist: string[]
+  deltaWhitelist: ShipTableDeltaName[]
 }
 
 export type EosioShipTypes = Map<string, Serialize.Type>
@@ -187,10 +187,18 @@ export type ShipPartialTransaction = [
 export type ShipTableDelta = [
   'table_delta_v0',
   {
-    name: string
+    name: ShipTableDeltaName
     rows: Array<{ present: boolean; data: [string, EosioTableRow] }>
   },
 ]
+
+export type ShipTableDeltaName =
+  | 'account_metadata'
+  | 'contract_table'
+  | 'contract_row'
+  | 'contract_index64'
+  | 'resource_usage'
+  | 'resource_limits_state'
 
 export type ShipContractRow = [
   'contract_row_v0',

@@ -5,6 +5,7 @@ import * as nodeAbieos from '@eosrio/node-abieos'
 import { EosioShipTypes, DeserializeParams } from './types'
 
 export function deserialize({ type, data, abieos, types }: DeserializeParams) {
+  console.log(`deserialize ${type}`)
   if (abieos) {
     if (typeof data === 'string') return nodeAbieos.hex_to_json('0', type, data)
     return nodeAbieos.bin_to_json('0', type, Buffer.from(data))

@@ -124,11 +124,13 @@ export const createEosioShipReader = ({
   }
 
   const deserializeDeltas = async (data: Uint8Array): Promise<any> => {
+    console.log('deserializeDeltas')
     const deltas = await deserializeParallel('table_delta[]', data)
 
     return await Promise.all(
       deltas.map(async (delta: any) => {
         if (delta[0] === 'table_delta_v0') {
+          console.log(delta[1].name)
           if (deltaWhitelist.indexOf(delta[1].name) >= 0) {
             const deserialized = await deserializationWorkers.exec(
               delta[1].rows.map((row: any) => ({
@@ -178,6 +180,8 @@ export const createEosioShipReader = ({
     let traces: any = []
     let deltas: any = []
 
+    console.log('response from deserialized response', Object.keys(response))
+
     if (response.block) {
       block = await deserializeParallel('signed_block', response.block)
     } else if (shipRequest.fetch_block) {
@@ -191,7 +195,9 @@ export const createEosioShipReader = ({
     }
 
     if (response.deltas) {
+      console.log('deserialized deltas')
       deltas = await deserializeDeltas(response.deltas)
+      console.log(JSON.stringify(deltas))
     } else if (shipRequest.fetch_deltas) {
       log$.next({ message: `Block #${response.this_block.block_num} does not contain delta data` })
     }
