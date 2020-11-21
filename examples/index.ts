@@ -2,7 +2,6 @@ import { EosioShipReaderConfig, ShipBlockResponse } from '../src/types'
 import { ErrorEvent } from 'ws'
 import { createEosioShipReader } from '../src/index'
 import fetch from 'node-fetch'
-import fs from 'fs'
 
 const initReader = async () => {
   const info = await fetch('http://127.0.0.1:8888/v1/chain/get_info').then((res: any) => res.json())
@@ -37,11 +36,21 @@ const initReader = async () => {
   errors$.subscribe((e: ErrorEvent) => console.log(e))
 
   blocks$.subscribe((blockData: ShipBlockResponse) => {
-    const { this_block, last_irreversible, head, prev_block, block, traces, deltas } = blockData
+    const { this_block, deltas } = blockData
 
     console.log(this_block.block_num)
 
     // block.transactions?.map(console.log)
+    const contract_row_deltas = deltas.find((delta) => delta[1].name === 'contract_row')
+
+    contract_row_deltas &&
+      contract_row_deltas.forEach((deltaEntry) => {
+        if (typeof deltaEntry !== 'string') {
+          deltaEntry.rows.forEach((row) => console.log(row.data))
+        }
+      })
+
+    process.exit(1)
   })
 
   close$.subscribe(() => console.log('connection closed'))

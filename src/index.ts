@@ -39,8 +39,6 @@ export const createEosioShipReader = ({
   let types: EosioShipTypes | null
   let deserializationWorkers: StaticPool<Array<{ type: string; data: Uint8Array }>, any>
   let unconfirmedMessages = 0
-  let lastBlock = 0
-  let currentBlock = 0
   const blocksQueue = new PQueue({ concurrency: 1 })
   const shipRequest = { ...defaultShipRequest, ...request }
 
@@ -81,8 +79,6 @@ export const createEosioShipReader = ({
   const reset = () => {
     stop()
     unconfirmedMessages = 0
-    lastBlock = 0
-    currentBlock = 0
   }
 
   // reset state on close
