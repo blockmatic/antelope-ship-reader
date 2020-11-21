@@ -5,7 +5,8 @@
     "rootDirs": ["src/"],
     "outDir": "dist",
     "esModuleInterop": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "declaration": true
   },
   "exclude": ["node_modules"]
 }
