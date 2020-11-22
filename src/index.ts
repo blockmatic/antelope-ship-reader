@@ -14,6 +14,7 @@ import {
 import { serialize } from './serializer'
 import { StaticPool } from 'node-worker-threads-pool'
 import { deserialize } from './deserializer'
+export * from './types'
 
 const defaultShipRequest: EosioShipRequest = {
   start_block_num: 0,

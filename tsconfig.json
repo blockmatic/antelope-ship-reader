@@ -1,41 +1,22 @@
 {
   "extends": "./node_modules/@blockmatic/tsconfig/tsconfig.nodejs.json",
   "compilerOptions": {
-    "baseUrl": "./src",
-    "rootDirs": ["src/"],
-    "typeRoots": ["./src/types"],
-    "outDir": "dist",
+    "outDir": "dist/",
+    "target": "esnext",
+    "module": "esnext",
+    "lib": ["esnext"],
+    "moduleResolution": "node",
+    "strict": true,
+    "sourceMap": true,
     "esModuleInterop": true,
-    "skipLibCheck": true,
+    "noEmitOnError": true,
     "declaration": true,
-    "declarationDir": "dist/"
+    "removeComments": false,
+    "noImplicitAny": true,
+    "forceConsistentCasingInFileNames": true,
+    "noUnusedLocals": true,
+    "pretty": true,
+    "skipLibCheck": true
   },
-  "exclude": ["node_modules"],
-  "files": ["src/index.ts"],
-  "includes": ["./src/**/*.ts"]
+  "include": ["src"]
 }
-
-// {
-//   "compilerOptions": {
-//     /* Basic Options */
-//     "target": "es6",
-//     "module": "es2015",
-//     "lib": ["es2016", "es2017"],
-//     "skipLibCheck": true,
-//     "declaration": true,
-//     "declarationDir": "dist/",
-//     "sourceMap": true,
-//     "outDir": "dist/lib",
-//     /* Strict Type-Checking Options */
-//     "strict": true,
-
-//     /* Module Resolution Options */
-//     "allowSyntheticDefaultImports": true,
-//     "moduleResolution": "node",
-//     "esModuleInterop": true,
-//     "resolveJsonModule": true
-//   },
-//   "files": ["src/index.ts"],
-
-//   "includes": ["./src/**/*.ts"]
-// }
