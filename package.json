@@ -21,8 +21,7 @@
     "prepublishOnly": "yarn run format",
     "preversion": "yarn run lint",
     "version": "yarn run format && git add -A src",
-    "postversion": "git push && git push --tags",
-    "publish": "npm publish --access public"
+    "postversion": "git push && git push --tags"
   },
   "lint-staged": {
     "*.{ts,tsx,js}": [
