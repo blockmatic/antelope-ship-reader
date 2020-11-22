@@ -11,7 +11,7 @@ const initReader = async () => {
     ws_url: 'ws://localhost:8080',
     ds_threads: 4,
     ds_experimental: false,
-    deltaWhitelist: [
+    delta_whitelist: [
       'account_metadata',
       'contract_table',
       'contract_row',
@@ -19,7 +19,7 @@ const initReader = async () => {
       'resource_usage',
       'resource_limits_state',
     ],
-    tableRows: [
+    table_rows: [
       { code: 'bitcashtests', scope: 'bitcashtests', table: 'appstates' },
       { code: 'bitcashtests', scope: 'bitcashtests', table: 'exfees' },
       { code: 'bitcashtests', scope: 'bitcashtests', table: 'fees' },

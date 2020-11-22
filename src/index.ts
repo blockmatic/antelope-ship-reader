@@ -35,7 +35,7 @@ export const createEosioShipReader = ({
   request,
   ds_threads,
   ds_experimental,
-  deltaWhitelist,
+  delta_whitelist,
 }: EosioShipReaderConfig) => {
   // eosio-ship-reader state
   let socket: WebSocket
@@ -106,7 +106,7 @@ export const createEosioShipReader = ({
     log$.next({ message: 'Initializing deserialization worker pool', data: { ds_threads } })
     deserializationWorkers = new StaticPool({
       size: ds_threads,
-      task: './dist/src/deserializer.js',
+      task: './dist/deserializer.js',
       workerData: {
         abi,
         options: {
@@ -132,7 +132,7 @@ export const createEosioShipReader = ({
     return await Promise.all(
       deltas.map(async (delta: any) => {
         if (delta[0] === 'table_delta_v0') {
-          if (deltaWhitelist.indexOf(delta[1].name) >= 0) {
+          if (delta_whitelist.indexOf(delta[1].name) >= 0) {
             const deserialized = await deserializationWorkers.exec(
               delta[1].rows.map((row: any) => ({
                 type: delta[1].name,
@@ -142,6 +142,7 @@ export const createEosioShipReader = ({
 
             if (!deserialized.success) throw new Error(deserialized.message)
 
+            console.log('deltas', deserialized)
             return [
               delta[0],
               {

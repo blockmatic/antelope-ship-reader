@@ -2,9 +2,8 @@
   "extends": "./node_modules/@blockmatic/tsconfig/tsconfig.nodejs.json",
   "compilerOptions": {
     "outDir": "dist/",
-    "target": "esnext",
-    "module": "esnext",
-    "lib": ["esnext"],
+    "target": "es6",
+    "lib": ["es6"],
     "moduleResolution": "node",
     "strict": true,
     "sourceMap": true,
@@ -16,7 +15,7 @@
     "forceConsistentCasingInFileNames": true,
     "noUnusedLocals": true,
     "pretty": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
   },
   "include": ["src"]
 }

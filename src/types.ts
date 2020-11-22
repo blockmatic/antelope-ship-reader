@@ -17,8 +17,8 @@ export interface EosioShipReaderConfig {
   ds_threads: number
   ds_experimental: boolean
   request: EosioShipRequest
-  deltaWhitelist: ShipTableDeltaName[]
-  tableRows: EosioShipTableRow[]
+  delta_whitelist: ShipTableDeltaName[]
+  table_rows: EosioShipTableRow[]
 }
 
 export type EosioShipTypes = Map<string, Serialize.Type>
