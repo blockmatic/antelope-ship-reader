@@ -1,4 +1,4 @@
-import { EosioShipReaderConfig, ShipBlockResponse } from '../src/types'
+import { EosioShipReaderConfig, EosioShipBlock } from '../src/types'
 import { ErrorEvent } from 'ws'
 import { createEosioShipReader } from '../src/index'
 import fetch from 'node-fetch'
@@ -19,6 +19,16 @@ const initReader = async () => {
       'resource_usage',
       'resource_limits_state',
     ],
+    tableRows: [
+      { code: 'bitcashtests', scope: 'bitcashtests', table: 'appstates' },
+      { code: 'bitcashtests', scope: 'bitcashtests', table: 'exfees' },
+      { code: 'bitcashtests', scope: 'bitcashtests', table: 'fees' },
+      { code: 'bitcashtests', scope: 'bitcashtests', table: 'accounts' },
+      { code: 'bitcashtests', scope: 'bitcashtests', table: 'gpositions' },
+      { code: 'bitcashtests', scope: 'bitcashtests', table: 'limits' },
+      { code: 'bitcashtests', scope: 'bitcashtests', table: 'positions' },
+      { code: 'bitcashtests', scope: 'bitcashtests', table: 'stat' },
+    ],
     request: {
       start_block_num: info.head_block_num,
       end_block_num: 0xffffffff,
@@ -35,7 +45,7 @@ const initReader = async () => {
 
   errors$.subscribe((e: ErrorEvent) => console.log(e))
 
-  blocks$.subscribe((blockData: ShipBlockResponse) => {
+  blocks$.subscribe((blockData: EosioShipBlock) => {
     const { this_block, deltas } = blockData
 
     console.log(this_block.block_num)

@@ -18,6 +18,7 @@ export interface EosioShipReaderConfig {
   ds_experimental: boolean
   request: EosioShipRequest
   deltaWhitelist: ShipTableDeltaName[]
+  tableRows: EosioShipTableRow[]
 }
 
 export type EosioShipTypes = Map<string, Serialize.Type>
@@ -30,6 +31,17 @@ export interface EosioShipReaderInfo {
 }
 
 export type ShipBlockData = any
+
+export type EosioShipTableRow = {
+  code: string
+  scope: string
+  table: string
+  json?: boolean
+  lower_bound?: string
+  upper_bound?: string
+}
+
+// ==============================================================
 
 export declare type EosTable = {
   code: string
@@ -86,7 +98,7 @@ export interface DeserializeParams {
   types: EosioShipTypes
 }
 
-export type ShipBlockResponse = {
+export type EosioShipBlock = {
   head: { block_num: number; block_id: string }
   last_irreversible: { block_num: number; block_id: string }
   this_block: { block_num: number; block_id: string }

@@ -8,8 +8,11 @@ import {
   EosioShipReaderConfig,
   EosioShipTypes,
   EosioShipSocketMessage,
-  ShipBlockResponse,
+  EosioShipBlock,
   EosioShipReaderInfo,
+  EosioShipTableRow,
+  ShipTransactionTrace,
+  ShipTableDelta,
 } from './types'
 import { serialize } from './serializer'
 import { StaticPool } from 'node-worker-threads-pool'
@@ -48,7 +51,10 @@ export const createEosioShipReader = ({
   const errors$ = new Subject<ErrorEvent>()
   const close$ = new Subject<CloseEvent>()
   const open$ = new Subject<OpenEvent>()
-  const blocks$ = new Subject<ShipBlockResponse>()
+  const blocks$ = new Subject<EosioShipBlock>()
+  const deltas$ = new Subject<ShipTableDelta>()
+  const traces$ = new Subject<ShipTransactionTrace>()
+  const rows$ = new Subject<EosioShipTableRow>()
   const forks$ = new Subject<number>()
   const log$ = new Subject<EosioShipReaderInfo>()
 
@@ -193,7 +199,7 @@ export const createEosioShipReader = ({
       log$.next({ message: `Block #${response.this_block.block_num} does not contain delta data` })
     }
 
-    const blockData: ShipBlockResponse = {
+    const blockData: EosioShipBlock = {
       this_block: response.this_block,
       head: response.head,
       last_irreversible: response.last_irreversible,
@@ -234,6 +240,9 @@ export const createEosioShipReader = ({
     start,
     stop,
     blocks$,
+    deltas$,
+    traces$,
+    rows$,
     forks$,
     open$,
     close$,
