@@ -2,18 +2,18 @@
   "name": "@blockmatic/eosio-ship-reader",
   "version": "0.0.4",
   "description": "Multi-threaded reactive eosio state reader for NodeJS apps",
-  "main": "dist/src/index.js",
-  "types": "dist/src/types.d.ts",
   "repository": "git@github.com:blockmatic/eosio-ship-reader.git",
   "author": "blockmatic.io",
   "license": "MIT",
   "private": false,
+  "main": "dist/src/index.js",
+  "types": "dist/src/types.d.ts",
   "files": [
-    "dist/**/*"
+    "dist/src/**/*"
   ],
   "scripts": {
     "dev": "tsc && ts-node-dev --no-deps --respawn examples/index",
-    "build": "tsc",
+    "build": "rimraf dist && tsc",
     "lint": "eslint --ignore-path .gitignore \"**/*.+(js|ts|tsx)\"",
     "format": "prettier --ignore-path .gitignore --write \"**/*.+(js|json|ts|tsx)\"",
     "dist": "node dist/examples",
@@ -46,7 +46,8 @@
     "lint-staged": "^10.5.1",
     "prettier": "^2.1.2",
     "ts-node-dev": "^1.0.0",
-    "typescript": "^3.7"
+    "typescript": "^3.7",
+    "rimraf": "^3.0.2"
   },
   "dependencies": {
     "@eosrio/node-abieos": "^2.1.0-beta.0",
