@@ -1,0 +1,73 @@
+{
+  "projectName": "eosio-ship-reader",
+  "projectOwner": "blockmatic",
+  "repoType": "github",
+  "repoHost": "https://github.com",
+  "files": [
+    "README.md"
+  ],
+  "imageSize": 100,
+  "commit": false,
+  "commitConvention": "angular",
+  "contributors": [
+    {
+      "login": "gaboesquivel",
+      "name": "Gabo Esquivel",
+      "avatar_url": "https://avatars0.githubusercontent.com/u/391270?v=4",
+      "profile": "https://gaboesquivel.com",
+      "contributions": [
+        "code",
+        "talk",
+        "ideas"
+      ]
+    },
+    {
+      "login": "fabian-emilius",
+      "name": "Fabian Emilius",
+      "avatar_url": "https://avatars3.githubusercontent.com/u/20770096?v=4",
+      "profile": "https://fabianemilius.com",
+      "contributions": [
+        "code",
+        "ideas"
+      ]
+    },
+    {
+      "login": "cc32d9",
+      "name": "cc32d9",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/40351024?v=4",
+      "profile": "https://medium.com/@cc32d9",
+      "contributions": [
+        "ideas"
+      ]
+    },
+    {
+      "login": "michaeljyeates",
+      "name": "Michael Yeates",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/4223666?v=4",
+      "profile": "https://eosdac.io",
+      "contributions": [
+        "ideas"
+      ]
+    },
+    {
+      "login": "igorls",
+      "name": "Igor Lins e Silva",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/4753812?v=4",
+      "profile": "https://www.linkedin.com/in/igorls/",
+      "contributions": [
+        "code",
+        "ideas"
+      ]
+    },
+    {
+      "login": "ruge0326",
+      "name": "RuGe",
+      "avatar_url": "https://avatars1.githubusercontent.com/u/70239531?v=4",
+      "profile": "https://www.rgcompany.org",
+      "contributions": [
+        "code"
+      ]
+    }
+  ],
+  "contributorsPerLine": 7
+}

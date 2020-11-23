@@ -106,3 +106,24 @@ Blockmatic is building a robust ecosystem of people and tools for the developmen
 [3]: http://www.github.com/blockmatic
 
 <!-- Please don't remove this: Grab your social icons from https://github.com/carlsednaoui/gitsocial -->
+
+## Contributors ✨
+
+Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
+
+<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
+<!-- prettier-ignore -->
+<table>
+  <tr>
+    <td align="center"><a href="https://gaboesquivel.com"><img src="https://avatars0.githubusercontent.com/u/391270?v=4" width="100px;" alt="Gabo Esquivel"/><br /><sub><b>Gabo Esquivel</b></sub></a><br /><a href="https://github.com/blockmatic/eosio-ship-reader/commits?author=gaboesquivel" title="Code">💻</a> <a href="#talk-gaboesquivel" title="Talks">📢</a> <a href="#ideas-gaboesquivel" title="Ideas, Planning, & Feedback">🤔</a></td>
+    <td align="center"><a href="https://fabianemilius.com"><img src="https://avatars3.githubusercontent.com/u/20770096?v=4" width="100px;" alt="Fabian Emilius"/><br /><sub><b>Fabian Emilius</b></sub></a><br /><a href="https://github.com/blockmatic/eosio-ship-reader/commits?author=fabian-emilius" title="Code">💻</a> <a href="#ideas-fabian-emilius" title="Ideas, Planning, & Feedback">🤔</a></td>
+    <td align="center"><a href="https://medium.com/@cc32d9"><img src="https://avatars2.githubusercontent.com/u/40351024?v=4" width="100px;" alt="cc32d9"/><br /><sub><b>cc32d9</b></sub></a><br /><a href="#ideas-cc32d9" title="Ideas, Planning, & Feedback">🤔</a></td>
+    <td align="center"><a href="https://eosdac.io"><img src="https://avatars2.githubusercontent.com/u/4223666?v=4" width="100px;" alt="Michael Yeates"/><br /><sub><b>Michael Yeates</b></sub></a><br /><a href="#ideas-michaeljyeates" title="Ideas, Planning, & Feedback">🤔</a></td>
+    <td align="center"><a href="https://www.linkedin.com/in/igorls/"><img src="https://avatars2.githubusercontent.com/u/4753812?v=4" width="100px;" alt="Igor Lins e Silva"/><br /><sub><b>Igor Lins e Silva</b></sub></a><br /><a href="https://github.com/blockmatic/eosio-ship-reader/commits?author=igorls" title="Code">💻</a> <a href="#ideas-igorls" title="Ideas, Planning, & Feedback">🤔</a></td>
+    <td align="center"><a href="https://www.rgcompany.org"><img src="https://avatars1.githubusercontent.com/u/70239531?v=4" width="100px;" alt="RuGe"/><br /><sub><b>RuGe</b></sub></a><br /><a href="https://github.com/blockmatic/eosio-ship-reader/commits?author=ruge0326" title="Code">💻</a></td>
+  </tr>
+</table>
+
+<!-- ALL-CONTRIBUTORS-LIST:END -->
+
+This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind welcome!
