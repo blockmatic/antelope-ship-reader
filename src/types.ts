@@ -41,6 +41,8 @@ export type EosioShipTableRow = {
   upper_bound?: string
 }
 
+export type EosioShipRowDelta = any
+
 // ==============================================================
 
 export declare type EosTable = {

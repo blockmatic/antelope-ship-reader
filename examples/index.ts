@@ -1,4 +1,4 @@
-import { EosioShipReaderConfig, EosioShipBlock } from '../src/types'
+import { EosioShipReaderConfig, EosioShipBlock, EosioShipRowDelta } from '../src/types'
 import { ErrorEvent } from 'ws'
 import { createEosioShipReader } from '../src/index'
 import fetch from 'node-fetch'
@@ -41,7 +41,7 @@ const initReader = async () => {
     },
   }
 
-  const { start, blocks$, close$, errors$ } = createEosioShipReader(eosioShipReaderConfig)
+  const { start, blocks$, close$, errors$, rows$ } = createEosioShipReader(eosioShipReaderConfig)
 
   errors$.subscribe((e: ErrorEvent) => console.log(e))
 
@@ -61,6 +61,11 @@ const initReader = async () => {
       })
 
     process.exit(1)
+  })
+
+  // stream of table row deltas
+  rows$.subscribe((rowDelta: EosioShipRowDelta) => {
+    console.log(rowDelta)
   })
 
   close$.subscribe(() => console.log('connection closed'))

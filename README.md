@@ -10,7 +10,7 @@ Demux is a backend infrastructure pattern for sourcing blockchain events to dete
 
 Storing and retrieving indexed data is something that developers have commonly utilized for decades. The ability to search, sort, filter, etc. are all easily done in traditional database environments, but is something that is missed when working directly with the inherently limited query interface of blockchain nodes.
 
-RxDemux allows deterministic updates of queryable data stores and event triggers through real-time subscriptions to EOSIO blockchain actions and state deltas using the state_history_plugin web socket and RxJS observable streams.
+Demux allows deterministic updates of queryable data stores and event triggers through real-time subscriptions to EOSIO blockchain actions and state deltas using the state_history_plugin web socket and RxJS observable streams.
 
 With the Demux pattern, we can separate concerns and utilize the technology more appropriate to solve them. The blockchain provides decentralized consensus and high security and it's treated at the single source of truth.
 
@@ -25,7 +25,7 @@ Demux solves these problems by off-loading queries to any persistence layer that
 - As long as application code is open source, and the blockchain is public, all application state can be audited
 - No need to maintain multiple ways of updating state (submitting transactions is the sole way)
 
-RxDemux is a reactive alternative to the [DemuxJS](https://github.com/EOSIO/demux-js) library developed by Block.one
+eosio-ship-reader is a reactive alternative to the [DemuxJS](https://github.com/EOSIO/demux-js) library developed by Block.one
 
 ## EOSIO State History Plugin
 
@@ -44,7 +44,7 @@ So, to be able to interpret its output, the client software has to have copies o
 RxJS is a library for functional reactive programming in JavaScript using Observables to make easier to compose asynchronous or callback-based code. Observables are a representation of any set of values over any amount of time. This is the most basic building block of RxJS.
 
 <p align="center">
-	<img src="./assets/observer-desing-pattern.png" width="600">
+	<img src="./docs/observer-desing-pattern.png" width="600">
 </p>
 
 RxJS (and reactive programming in general) can be thought of as writing assembly lines in your software applications. It allows you to write software that is reusable, configurable, and asynchronous. These assembly lines can be chained together, split apart, configured slightly differently, or just used without any modification at all.
@@ -63,11 +63,93 @@ When this happens, and happens often, your queryable read databases have to roll
 
 ## Usage
 
+`yarn add @blockmatic/eosio-state-reader`
+
+```ts
+const info = await fetch(
+  'http://127.0.0.1:8888/v1/chain/get_info',
+).then((res: any) => res.json())
+console.log(info)
+
+const eosioShipReaderConfig: EosioShipReaderConfig = {
+  ws_url: 'ws://localhost:8080',
+  ds_threads: 4,
+  ds_experimental: false,
+  delta_whitelist: [
+    'account_metadata',
+    'contract_table',
+    'contract_row',
+    'contract_index64',
+    'resource_usage',
+    'resource_limits_state',
+  ],
+  table_rows: [
+    { code: 'bitcashtests', scope: 'bitcashtests', table: 'appstates' },
+    { code: 'bitcashtests', scope: 'bitcashtests', table: 'exfees' },
+    { code: 'bitcashtests', scope: 'bitcashtests', table: 'fees' },
+    { code: 'bitcashtests', scope: 'bitcashtests', table: 'accounts' },
+    { code: 'bitcashtests', scope: 'bitcashtests', table: 'gpositions' },
+    { code: 'bitcashtests', scope: 'bitcashtests', table: 'limits' },
+    { code: 'bitcashtests', scope: 'bitcashtests', table: 'positions' },
+    { code: 'bitcashtests', scope: 'bitcashtests', table: 'stat' },
+  ],
+  request: {
+    start_block_num: info.head_block_num,
+    end_block_num: 0xffffffff,
+    max_messages_in_flight: 50,
+    have_positions: [],
+    irreversible_only: false,
+    fetch_block: true,
+    fetch_traces: true,
+    fetch_deltas: true,
+  },
+}
+
+const { start, blocks$, rows$ } = createEosioShipReader(eosioShipReaderConfig)
+
+// stream of deserialized block data
+blocks$.subscribe((blockData: EosioShipBlock) => {
+  const { this_block, deltas } = blockData
+
+  console.log(this_block.block_num)
+})
+
+// stream of table row deltas
+rows$.subscribe((rowDelta: EosioShipRowDelta) => {
+  console.log(rowDelta)
+})
+```
+
 See the `examples` directory.
 
 ## Contributing
 
 Read the [contributing guidelines](https://developers.blockmatic.io) for details.
+
+## Credits
+
+This project leverages deserialization code and patterns from other projects such Hyperion, EOSIO Contract API and EOSDac state reader.
+
+## Contributors ✨
+
+Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
+
+<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
+<!-- prettier-ignore -->
+<table>
+  <tr>
+    <td align="center"><a href="https://gaboesquivel.com"><img src="https://avatars0.githubusercontent.com/u/391270?v=4" width="100px;" alt="Gabo Esquivel"/><br /><sub><b>Gabo Esquivel</b></sub></a><br /><a href="https://github.com/blockmatic/eosio-ship-reader/commits?author=gaboesquivel" title="Code">💻</a> <a href="#talk-gaboesquivel" title="Talks">📢</a> <a href="#ideas-gaboesquivel" title="Ideas, Planning, & Feedback">🤔</a></td>
+    <td align="center"><a href="https://fabianemilius.com"><img src="https://avatars3.githubusercontent.com/u/20770096?v=4" width="100px;" alt="Fabian Emilius"/><br /><sub><b>Fabian Emilius</b></sub></a><br /><a href="https://github.com/blockmatic/eosio-ship-reader/commits?author=fabian-emilius" title="Code">💻</a> <a href="#ideas-fabian-emilius" title="Ideas, Planning, & Feedback">🤔</a></td>
+    <td align="center"><a href="https://medium.com/@cc32d9"><img src="https://avatars2.githubusercontent.com/u/40351024?v=4" width="100px;" alt="cc32d9"/><br /><sub><b>cc32d9</b></sub></a><br /><a href="#ideas-cc32d9" title="Ideas, Planning, & Feedback">🤔</a></td>
+    <td align="center"><a href="https://eosdac.io"><img src="https://avatars2.githubusercontent.com/u/4223666?v=4" width="100px;" alt="Michael Yeates"/><br /><sub><b>Michael Yeates</b></sub></a><br /><a href="#ideas-michaeljyeates" title="Ideas, Planning, & Feedback">🤔</a></td>
+    <td align="center"><a href="https://www.linkedin.com/in/igorls/"><img src="https://avatars2.githubusercontent.com/u/4753812?v=4" width="100px;" alt="Igor Lins e Silva"/><br /><sub><b>Igor Lins e Silva</b></sub></a><br /><a href="https://github.com/blockmatic/eosio-ship-reader/commits?author=igorls" title="Code">💻</a> <a href="#ideas-igorls" title="Ideas, Planning, & Feedback">🤔</a></td>
+    <td align="center"><a href="https://www.rgcompany.org"><img src="https://avatars1.githubusercontent.com/u/70239531?v=4" width="100px;" alt="RuGe"/><br /><sub><b>RuGe</b></sub></a><br /><a href="https://github.com/blockmatic/eosio-ship-reader/commits?author=ruge0326" title="Code">💻</a></td>
+  </tr>
+</table>
+
+<!-- ALL-CONTRIBUTORS-LIST:END -->
+
+This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind welcome!
 
 ## Blockmatic
 
@@ -106,24 +188,3 @@ Blockmatic is building a robust ecosystem of people and tools for the developmen
 [3]: http://www.github.com/blockmatic
 
 <!-- Please don't remove this: Grab your social icons from https://github.com/carlsednaoui/gitsocial -->
-
-## Contributors ✨
-
-Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
-
-<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
-<!-- prettier-ignore -->
-<table>
-  <tr>
-    <td align="center"><a href="https://gaboesquivel.com"><img src="https://avatars0.githubusercontent.com/u/391270?v=4" width="100px;" alt="Gabo Esquivel"/><br /><sub><b>Gabo Esquivel</b></sub></a><br /><a href="https://github.com/blockmatic/eosio-ship-reader/commits?author=gaboesquivel" title="Code">💻</a> <a href="#talk-gaboesquivel" title="Talks">📢</a> <a href="#ideas-gaboesquivel" title="Ideas, Planning, & Feedback">🤔</a></td>
-    <td align="center"><a href="https://fabianemilius.com"><img src="https://avatars3.githubusercontent.com/u/20770096?v=4" width="100px;" alt="Fabian Emilius"/><br /><sub><b>Fabian Emilius</b></sub></a><br /><a href="https://github.com/blockmatic/eosio-ship-reader/commits?author=fabian-emilius" title="Code">💻</a> <a href="#ideas-fabian-emilius" title="Ideas, Planning, & Feedback">🤔</a></td>
-    <td align="center"><a href="https://medium.com/@cc32d9"><img src="https://avatars2.githubusercontent.com/u/40351024?v=4" width="100px;" alt="cc32d9"/><br /><sub><b>cc32d9</b></sub></a><br /><a href="#ideas-cc32d9" title="Ideas, Planning, & Feedback">🤔</a></td>
-    <td align="center"><a href="https://eosdac.io"><img src="https://avatars2.githubusercontent.com/u/4223666?v=4" width="100px;" alt="Michael Yeates"/><br /><sub><b>Michael Yeates</b></sub></a><br /><a href="#ideas-michaeljyeates" title="Ideas, Planning, & Feedback">🤔</a></td>
-    <td align="center"><a href="https://www.linkedin.com/in/igorls/"><img src="https://avatars2.githubusercontent.com/u/4753812?v=4" width="100px;" alt="Igor Lins e Silva"/><br /><sub><b>Igor Lins e Silva</b></sub></a><br /><a href="https://github.com/blockmatic/eosio-ship-reader/commits?author=igorls" title="Code">💻</a> <a href="#ideas-igorls" title="Ideas, Planning, & Feedback">🤔</a></td>
-    <td align="center"><a href="https://www.rgcompany.org"><img src="https://avatars1.githubusercontent.com/u/70239531?v=4" width="100px;" alt="RuGe"/><br /><sub><b>RuGe</b></sub></a><br /><a href="https://github.com/blockmatic/eosio-ship-reader/commits?author=ruge0326" title="Code">💻</a></td>
-  </tr>
-</table>
-
-<!-- ALL-CONTRIBUTORS-LIST:END -->
-
-This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind welcome!
