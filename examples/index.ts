@@ -3,9 +3,20 @@ import { ErrorEvent } from 'ws'
 import { createEosioShipReader } from '../src/index'
 import fetch from 'node-fetch'
 
+const eosioApi = 'http://127.0.0.1:8888'
+const eosioRpcRequests = [
+  fetch(`${eosioApi}/v1/chain/get_info`).then((res: any) => res.json()),
+  fetch(`${eosioApi}/v1/chain/get_abi`, {
+    method: 'POST',
+    body: JSON.stringify({
+      account_name: 'bitcashtests',
+    }),
+  }).then((res: any) => res.json()),
+]
+const rpcPromise = Promise.all(eosioRpcRequests)
+
 const initReader = async () => {
-  const info = await fetch('http://127.0.0.1:8888/v1/chain/get_info').then((res: any) => res.json())
-  console.log(info)
+  const [info, bitcashtestsAbi] = await rpcPromise
 
   const eosioShipReaderConfig: EosioShipReaderConfig = {
     ws_url: 'ws://localhost:8080',
@@ -19,7 +30,7 @@ const initReader = async () => {
       'resource_usage',
       'resource_limits_state',
     ],
-    table_rows: [
+    table_rows_whitelist: [
       { code: 'bitcashtests', scope: 'bitcashtests', table: 'appstates' },
       { code: 'bitcashtests', scope: 'bitcashtests', table: 'exfees' },
       { code: 'bitcashtests', scope: 'bitcashtests', table: 'fees' },
@@ -29,7 +40,12 @@ const initReader = async () => {
       { code: 'bitcashtests', scope: 'bitcashtests', table: 'positions' },
       { code: 'bitcashtests', scope: 'bitcashtests', table: 'stat' },
     ],
-    contract_abis: [],
+    contract_abis: [
+      {
+        code: 'bitcashtests',
+        abi: bitcashtestsAbi,
+      },
+    ],
     request: {
       start_block_num: info.head_block_num,
       end_block_num: 0xffffffff,

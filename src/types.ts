@@ -13,7 +13,7 @@ export interface EosioShipRequest {
 }
 
 export interface EosioShipReaderAbi {
-  contract_name: string
+  code: string
   abi: RpcInterfaces.Abi[]
 }
 

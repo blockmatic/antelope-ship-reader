@@ -42,10 +42,10 @@ export const createEosioShipReader = async ({
   contract_abis,
 }: EosioShipReaderConfig) => {
   // check if the contact abis were provided
-  const contractNames = [...new Set(table_rows_whitelist.map((row) => row.code))]
-  const missingAbis = contractNames.map((code) => !contract_abis?.find(({ contract_name }) => contract_name === code))
+  const contractNames = [...new Set(table_rows_whitelist?.map((row) => row.code))]
+  const missingAbis = contractNames.filter((contractName) => !contract_abis?.find(({ code }) => contractName === code))
   // TODO: get abis from node if the are missing.
-  if (missingAbis.length > 0) throw new Error('Missing abis in eosio-ship-reader')
+  if (missingAbis.length > 0) {throw new Error(`Missing abis for the following contracts ${missingAbis.toString()} in eosio-ship-reader `)}
 
   // eosio-ship-reader state
   let socket: WebSocket
@@ -145,7 +145,7 @@ export const createEosioShipReader = async ({
       deltas.map(async (delta: any) => {
         if (delta[0] !== 'table_delta_v0') throw Error(`Unsupported table delta type received ${delta[0]}`)
 
-        if (delta_whitelist.indexOf(delta[1].name) === -1) return delta
+        if (delta_whitelist?.indexOf(delta[1].name) === -1) return delta
 
         const deserialized = await deserializationWorkers.exec(
           delta[1].rows.map((row: any) => ({
@@ -156,14 +156,13 @@ export const createEosioShipReader = async ({
 
         if (!deserialized.success) throw new Error(deserialized.message)
 
-        console.log({ rows: delta[1].rows })
-
         return [
           delta[0],
           {
             ...delta[1],
             rows: delta[1].rows.map((row: any, index: number) => {
               console.log({ row })
+
               return {
                 ...row,
                 data: deserialized.data[index],
