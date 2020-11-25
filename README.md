@@ -2,6 +2,19 @@
 
 `eosio-ship-reader` is a multi-threaded reactive eosio state reader written in typescript using on rxjs and `worker_threads`.
 
+This package allows you to subscribe to JSON streams of EOSIO state data and events in NodeJS applications whitout dealing with all the complexity. By connecting to the EOSIO State History websocket and deserializing it's binary messages using nodejs worker_threads to parellalize desearialization execution we are able to acomplish real-time performance.
+
+*This is project is still on it's alpha state, you can reach us out on telegram for more information* 
+
+https://t.me/blockmatic
+
+
+## Understanding ABIs
+
+The Application Binary Interface (ABI) is a JSON-based description on how to convert user actions between their JSON and Binary representations. The ABI also describes how to convert the database state to/from JSON. Once you have described your contract via an ABI then developers and users will be able to interact with your contract seamlessly via JSON.
+
+https://developers.eos.io/welcome/latest/getting-started/smart-contract-development/understanding-ABI-files
+
 ## Demux Pattern
 
 Deterministic event-sourced state and side effect handling for blockchain applications.
@@ -143,7 +156,6 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
     <td align="center"><a href="https://medium.com/@cc32d9"><img src="https://avatars2.githubusercontent.com/u/40351024?v=4" width="100px;" alt="cc32d9"/><br /><sub><b>cc32d9</b></sub></a><br /><a href="#ideas-cc32d9" title="Ideas, Planning, & Feedback">🤔</a></td>
     <td align="center"><a href="https://eosdac.io"><img src="https://avatars2.githubusercontent.com/u/4223666?v=4" width="100px;" alt="Michael Yeates"/><br /><sub><b>Michael Yeates</b></sub></a><br /><a href="#ideas-michaeljyeates" title="Ideas, Planning, & Feedback">🤔</a></td>
     <td align="center"><a href="https://www.linkedin.com/in/igorls/"><img src="https://avatars2.githubusercontent.com/u/4753812?v=4" width="100px;" alt="Igor Lins e Silva"/><br /><sub><b>Igor Lins e Silva</b></sub></a><br /><a href="https://github.com/blockmatic/eosio-ship-reader/commits?author=igorls" title="Code">💻</a> <a href="#ideas-igorls" title="Ideas, Planning, & Feedback">🤔</a></td>
-    <td align="center"><a href="https://www.rgcompany.org"><img src="https://avatars1.githubusercontent.com/u/70239531?v=4" width="100px;" alt="RuGe"/><br /><sub><b>RuGe</b></sub></a><br /><a href="https://github.com/blockmatic/eosio-ship-reader/commits?author=ruge0326" title="Code">💻</a></td>
   </tr>
 </table>
 

@@ -29,6 +29,7 @@ const initReader = async () => {
       { code: 'bitcashtests', scope: 'bitcashtests', table: 'positions' },
       { code: 'bitcashtests', scope: 'bitcashtests', table: 'stat' },
     ],
+    contract_abis: [],
     request: {
       start_block_num: info.head_block_num,
       end_block_num: 0xffffffff,
@@ -41,24 +42,24 @@ const initReader = async () => {
     },
   }
 
-  const { start, blocks$, close$, errors$, rows$ } = createEosioShipReader(eosioShipReaderConfig)
+  const { start, blocks$, close$, errors$, rows$ } = await createEosioShipReader(eosioShipReaderConfig)
 
   errors$.subscribe((e: ErrorEvent) => console.log(e))
 
   blocks$.subscribe((blockData: EosioShipBlock) => {
-    const { this_block, deltas } = blockData
+    const { this_block } = blockData
 
     console.log(this_block.block_num)
 
-    // block.transactions?.map(console.log)
-    const contract_row_deltas = deltas.find((delta) => delta[1].name === 'contract_row')
+    // // block.transactions?.map(console.log)
+    // const contract_row_deltas = deltas.find((delta) => delta[1].name === 'contract_row')
 
-    contract_row_deltas &&
-      contract_row_deltas.forEach((deltaEntry) => {
-        if (typeof deltaEntry !== 'string') {
-          deltaEntry.rows.forEach((row) => console.log(row.data))
-        }
-      })
+    // contract_row_deltas &&
+    //   contract_row_deltas.forEach((deltaEntry) => {
+    //     if (typeof deltaEntry !== 'string') {
+    //       deltaEntry.rows.forEach((row) => console.log(row.data))
+    //     }
+    //   })
 
     process.exit(1)
   })

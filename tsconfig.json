@@ -15,7 +15,7 @@
     "forceConsistentCasingInFileNames": true,
     "noUnusedLocals": true,
     "pretty": true,
-    "skipLibCheck": true,
+    "skipLibCheck": true
   },
   "include": ["src"]
 }

@@ -30,13 +30,21 @@ const defaultShipRequest: EosioShipRequest = {
   fetch_deltas: true,
 }
 
-export const createEosioShipReader = ({
+export const createEosioShipReader = async ({
   ws_url,
   request,
   ds_threads,
   ds_experimental,
   delta_whitelist,
+  table_rows,
+  contract_abis,
 }: EosioShipReaderConfig) => {
+  // check if the contact abis were provided
+  const contractNames = [...new Set(table_rows.map((row) => row.code))]
+  const missingAbis = contractNames.map((code) => !contract_abis?.find(({ contract_name }) => contract_name === code))
+  // TODO: get abis from node if the are missing.
+  if (missingAbis.length > 0) throw new Error('Missing abis in eosio-ship-reader')
+
   // eosio-ship-reader state
   let socket: WebSocket
   let abi: RpcInterfaces.Abi | null
@@ -131,34 +139,34 @@ export const createEosioShipReader = ({
 
     return await Promise.all(
       deltas.map(async (delta: any) => {
-        if (delta[0] === 'table_delta_v0') {
-          if (delta_whitelist.indexOf(delta[1].name) >= 0) {
-            const deserialized = await deserializationWorkers.exec(
-              delta[1].rows.map((row: any) => ({
-                type: delta[1].name,
-                data: row.data,
-              })),
-            )
+        if (delta[0] !== 'table_delta_v0') throw Error(`Unsupported table delta type received ${delta[0]}`)
 
-            if (!deserialized.success) throw new Error(deserialized.message)
+        if (delta_whitelist.indexOf(delta[1].name) === -1) return delta
 
-            console.log('deltas', deserialized)
-            return [
-              delta[0],
-              {
-                ...delta[1],
-                rows: delta[1].rows.map((row: any, index: number) => ({
-                  ...row,
-                  data: deserialized.data[index],
-                })),
-              },
-            ]
-          }
+        const deserialized = await deserializationWorkers.exec(
+          delta[1].rows.map((row: any) => ({
+            type: delta[1].name,
+            data: row.data,
+          })),
+        )
 
-          return delta
-        }
+        if (!deserialized.success) throw new Error(deserialized.message)
 
-        throw Error(`Unsupported table delta type received ${delta[0]}`)
+        console.log({ rows: delta[1].rows })
+
+        return [
+          delta[0],
+          {
+            ...delta[1],
+            rows: delta[1].rows.map((row: any, index: number) => {
+              console.log({ row })
+              return {
+                ...row,
+                data: deserialized.data[index],
+              }
+            }),
+          },
+        ]
       }),
     )
   }

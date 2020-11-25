@@ -1,4 +1,4 @@
-import { Serialize } from 'eosjs'
+import { RpcInterfaces, Serialize } from 'eosjs'
 
 export type Types = Map<string, Serialize.Type>
 export interface EosioShipRequest {
@@ -12,6 +12,11 @@ export interface EosioShipRequest {
   fetch_deltas?: boolean
 }
 
+export interface EosioShipReaderAbi {
+  contract_name: string
+  abi: RpcInterfaces.Abi[]
+}
+
 export interface EosioShipReaderConfig {
   ws_url: string
   ds_threads: number
@@ -19,6 +24,7 @@ export interface EosioShipReaderConfig {
   request: EosioShipRequest
   delta_whitelist: ShipTableDeltaName[]
   table_rows: EosioShipTableRow[]
+  contract_abis: EosioShipReaderAbi[]
 }
 
 export type EosioShipTypes = Map<string, Serialize.Type>
