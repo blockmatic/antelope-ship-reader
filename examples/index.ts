@@ -21,7 +21,7 @@ const initReader = async () => {
   const eosioShipReaderConfig: EosioShipReaderConfig = {
     ws_url: 'ws://localhost:8080',
     ds_threads: 4,
-    ds_experimental: false,
+    ds_experimental: true,
     delta_whitelist: [
       'account_metadata',
       'contract_table',
