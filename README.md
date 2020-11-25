@@ -137,6 +137,9 @@ rows$.subscribe((rowDelta: EosioShipRowDelta) => {
 abis$.subscribe((abi: RpcInterfaces.Abi) => {
   console.log(abi)
 })
+
+// start streaming
+start()
 ```
 
 See the `examples` directory.
