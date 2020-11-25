@@ -56,6 +56,7 @@ export const createEosioShipReader = async ({
   let types: EosioShipTypes | null
   let deserializationWorkers: StaticPool<Array<{ type: string; data: Uint8Array }>, any>
   let unconfirmedMessages = 0
+  let lastBlock: number = 0
   const blocksQueue = new PQueue({ concurrency: 1 })
   const shipRequest = { ...defaultShipRequest, ...request }
 
@@ -101,6 +102,7 @@ export const createEosioShipReader = async ({
   const reset = () => {
     stop()
     unconfirmedMessages = 0
+    lastBlock = 0
   }
 
   // reset state on close
@@ -148,6 +150,7 @@ export const createEosioShipReader = async ({
       deltas.map(async (delta: any) => {
         if (delta[0] !== 'table_delta_v0') throw Error(`Unsupported table delta type received ${delta[0]}`)
 
+        // only process whitelisted deltas
         if (delta_whitelist?.indexOf(delta[1].name) === -1) return delta
 
         const deserialized = await deserializationWorkers.exec(
@@ -229,7 +232,16 @@ export const createEosioShipReader = async ({
       deltas,
     }
 
+    // Push microfork events
+    if (blockData.this_block.block_num <= lastBlock) {
+      forks$.next(blockData.this_block.block_num)
+      log$.next({ message: `Chain fork detected at block ${blockData.this_block.block_num}` })
+    }
+
+    // Push block data
     blocks$.next(blockData)
+    lastBlock = blockData.this_block.block_num
+    log$.next({ message: `Processed block ${blockData.this_block.block_num}` })
   }
 
   serializedMessages$.subscribe(async (message: EosioShipSocketMessage) => {
