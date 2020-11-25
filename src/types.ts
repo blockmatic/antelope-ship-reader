@@ -27,9 +27,9 @@ export interface EosioShipReaderConfig {
   ds_threads: number
   ds_experimental: boolean
   request: EosioShipRequest
-  delta_whitelist: ShipTableDeltaName[]
-  table_rows_whitelist: EosioShipTableRow[]
-  actions_whitelist: EosioShipAction[]
+  delta_whitelist?: ShipTableDeltaName[]
+  table_rows_whitelist?: EosioShipTableRow[]
+  actions_whitelist?: EosioShipAction[]
   contract_abis: EosioShipReaderAbi[]
 }
 
