@@ -25,7 +25,6 @@ export interface EosioShipAction {
 export interface EosioShipReaderConfig {
   ws_url: string
   ds_threads: number
-  ds_experimental: boolean
   request: EosioShipRequest
   delta_whitelist?: ShipTableDeltaName[]
   table_rows_whitelist?: EosioShipTableRow[]
@@ -109,8 +108,6 @@ export interface BlockRequestType {
 export interface DeserializeParams {
   type: string
   data: Uint8Array | string
-  abieos?: boolean
-  types: EosioShipTypes
 }
 
 export type EosioShipBlock = {

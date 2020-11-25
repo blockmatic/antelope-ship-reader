@@ -1,4 +1,4 @@
-import { EosioShipReaderConfig, EosioShipBlock, EosioShipRowDelta, EosioShipReaderInfo } from '../src/types'
+import { EosioShipReaderConfig, EosioShipRowDelta, EosioShipReaderInfo } from '../src/types'
 import { ErrorEvent } from 'ws'
 import { createEosioShipReader } from '../src/index'
 import fetch from 'node-fetch'
@@ -62,8 +62,8 @@ const initReader = async () => {
   const { blocks$, close$, errors$, rows$, log$ } = await createEosioShipReader(eosioShipReaderConfig)
 
   // stream of block data
-  blocks$.subscribe((blockData: EosioShipBlock) => {
-    console.log(blockData)
+  blocks$.subscribe(() => {
+    // console.log(blockData)
     process.exit(1)
   })
 

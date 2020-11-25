@@ -18,7 +18,12 @@ import {
 import { serialize } from './serializer'
 import { StaticPool } from 'node-worker-threads-pool'
 import { deserialize } from './deserializer'
+import * as nodeAbieos from '@eosrio/node-abieos'
 export * from './types'
+
+if (!nodeAbieos) {
+  throw new Error('Only Linux is supported')
+} 
 
 const defaultShipRequest: EosioShipRequest = {
   start_block_num: 0,
@@ -35,13 +40,13 @@ export const createEosioShipReader = async ({
   ws_url,
   request,
   ds_threads,
-  ds_experimental,
   delta_whitelist,
   table_rows_whitelist,
   actions_whitelist,
   contract_abis,
   auto_start,
 }: EosioShipReaderConfig) => {
+
   // check if the contact abis were provided
   const contractNames = [...new Set(table_rows_whitelist?.map((row) => row.code))]
   const missingAbis = contractNames.filter((contractName) => !contract_abis?.find(({ code }) => contractName === code))
@@ -74,6 +79,9 @@ export const createEosioShipReader = async ({
   const abis$ = new Subject<RpcInterfaces.Abi>()
   const log$ = new Subject<EosioShipReaderInfo>()
 
+  // load types
+  contract_abis?.forEach(({code, abi}) => nodeAbieos.load_abi(code, JSON.stringify(abi)))
+
   // create socket connection with nodeos ship and push event data through rx subjects
   const connectSocket = () => {
     socket = new WebSocket(ws_url, { perMessageDeflate: false })
@@ -103,6 +111,8 @@ export const createEosioShipReader = async ({
     stop()
     unconfirmedMessages = 0
     lastBlock = 0
+    nodeAbieos.delete_contract("eosio")
+    contract_abis?.forEach(({code}) => nodeAbieos.delete_contract(code))
   }
 
   // reset state on close
@@ -119,6 +129,8 @@ export const createEosioShipReader = async ({
     abi = JSON.parse(message as string) as RpcInterfaces.Abi
     types = Serialize.getTypesFromAbi(Serialize.createInitialTypes(), abi) as EosioShipTypes
 
+    nodeAbieos.load_abi("eosio", message as string)
+
     // initialize deserialization worker threads once abi is ready
     log$.next({ message: 'Initializing deserialization worker pool', data: { ds_threads } })
     deserializationWorkers = new StaticPool({
@@ -126,9 +138,6 @@ export const createEosioShipReader = async ({
       task: './dist/deserializer.js',
       workerData: {
         abi,
-        options: {
-          ds_experimental,
-        },
       },
     })
 
@@ -167,11 +176,20 @@ export const createEosioShipReader = async ({
           {
             ...delta[1],
             rows: delta[1].rows.map((row: any, index: number) => {
-              console.log({ row })
+              let data = deserialized.data[index]
+              const contractRowWhitelisted = !!table_rows_whitelist?.find((tableRow) => {
+                return tableRow.code === data.code && tableRow.scope === data.scope && tableRow.table === data.table
+              })
+              console.log({contractRowWhitelisted, data})
+
+              if(contractRowWhitelisted){
+                // TODO: deserialize whitelisted table deltas 
+                // const tableDataValue = deserialize(type, contractRow[1].value);
+              }
 
               return {
                 ...row,
-                data: deserialized.data[index],
+                data,
               }
             }),
           },
@@ -183,7 +201,7 @@ export const createEosioShipReader = async ({
   const deserializeMessage = async (message: EosioShipSocketMessage) => {
     if (!types) throw new Error('missing types')
 
-    const [type, response] = deserialize({ type: 'result', data: message, types })
+    const [type, response] = deserialize({ type: 'result', data: message })
 
     if (type !== 'get_blocks_result_v0') {
       log$.next({ message: 'Not supported message received', data: { type, response } })
