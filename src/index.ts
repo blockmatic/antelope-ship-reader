@@ -13,6 +13,7 @@ import {
   EosioShipTableRow,
   ShipTransactionTrace,
   ShipTableDelta,
+  EosioAction,
 } from './types'
 import { serialize } from './serializer'
 import { StaticPool } from 'node-worker-threads-pool'
@@ -36,11 +37,12 @@ export const createEosioShipReader = async ({
   ds_threads,
   ds_experimental,
   delta_whitelist,
-  table_rows,
+  table_rows_whitelist,
+  actions_whitelist,
   contract_abis,
 }: EosioShipReaderConfig) => {
   // check if the contact abis were provided
-  const contractNames = [...new Set(table_rows.map((row) => row.code))]
+  const contractNames = [...new Set(table_rows_whitelist.map((row) => row.code))]
   const missingAbis = contractNames.map((code) => !contract_abis?.find(({ contract_name }) => contract_name === code))
   // TODO: get abis from node if the are missing.
   if (missingAbis.length > 0) throw new Error('Missing abis in eosio-ship-reader')
@@ -62,6 +64,7 @@ export const createEosioShipReader = async ({
   const blocks$ = new Subject<EosioShipBlock>()
   const deltas$ = new Subject<ShipTableDelta>()
   const traces$ = new Subject<ShipTransactionTrace>()
+  const actions$ = new Subject<EosioAction>()
   const rows$ = new Subject<EosioShipTableRow>()
   const forks$ = new Subject<number>()
   const abis$ = new Subject<RpcInterfaces.Abi>()
@@ -253,6 +256,7 @@ export const createEosioShipReader = async ({
     deltas$,
     traces$,
     rows$,
+    actions$,
     forks$,
     open$,
     close$,

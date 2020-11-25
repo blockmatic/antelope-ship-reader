@@ -17,13 +17,19 @@ export interface EosioShipReaderAbi {
   abi: RpcInterfaces.Abi[]
 }
 
+export interface EosioShipAction {
+  code: string
+  action: string
+}
+
 export interface EosioShipReaderConfig {
   ws_url: string
   ds_threads: number
   ds_experimental: boolean
   request: EosioShipRequest
   delta_whitelist: ShipTableDeltaName[]
-  table_rows: EosioShipTableRow[]
+  table_rows_whitelist: EosioShipTableRow[]
+  actions_whitelist: EosioShipAction[]
   contract_abis: EosioShipReaderAbi[]
 }
 

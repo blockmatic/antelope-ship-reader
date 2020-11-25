@@ -128,7 +128,7 @@ blocks$.subscribe((blockData: EosioShipBlock) => {
   console.log(this_block.block_num)
 })
 
-// stream of table row deltas
+// stream of whitelisted table row deltas
 rows$.subscribe((rowDelta: EosioShipRowDelta) => {
   console.log(rowDelta)
 })
@@ -136,6 +136,11 @@ rows$.subscribe((rowDelta: EosioShipRowDelta) => {
 // stream of smart contract abis
 abis$.subscribe((abi: RpcInterfaces.Abi) => {
   console.log(abi)
+})
+
+// stream of whitelisted actions
+actions$.subscribe((actions: EosioAction) => {
+  console.log(action)
 })
 
 // start streaming
