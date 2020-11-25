@@ -30,7 +30,8 @@ export interface EosioShipReaderConfig {
   delta_whitelist?: ShipTableDeltaName[]
   table_rows_whitelist?: EosioShipTableRow[]
   actions_whitelist?: EosioShipAction[]
-  contract_abis: EosioShipReaderAbi[]
+  contract_abis?: EosioShipReaderAbi[]
+  auto_start?: boolean
 }
 
 export type EosioShipTypes = Map<string, Serialize.Type>

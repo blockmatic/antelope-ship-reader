@@ -40,12 +40,15 @@ export const createEosioShipReader = async ({
   table_rows_whitelist,
   actions_whitelist,
   contract_abis,
+  auto_start,
 }: EosioShipReaderConfig) => {
   // check if the contact abis were provided
   const contractNames = [...new Set(table_rows_whitelist?.map((row) => row.code))]
   const missingAbis = contractNames.filter((contractName) => !contract_abis?.find(({ code }) => contractName === code))
   // TODO: get abis from node if the are missing.
-  if (missingAbis.length > 0) {throw new Error(`Missing abis for the following contracts ${missingAbis.toString()} in eosio-ship-reader `)}
+  if (missingAbis.length > 0) {
+    throw new Error(`Missing abis for the following contracts ${missingAbis.toString()} in eosio-ship-reader `)
+  }
 
   // eosio-ship-reader state
   let socket: WebSocket
@@ -246,6 +249,9 @@ export const createEosioShipReader = async ({
       stop()
     }
   })
+
+  // auto start
+  if (auto_start) start()
 
   // eosio-ship-reader api
   return {

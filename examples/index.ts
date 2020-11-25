@@ -56,9 +56,10 @@ const initReader = async () => {
       fetch_traces: true,
       fetch_deltas: true,
     },
+    auto_start: true,
   }
 
-  const { start, blocks$, close$, errors$, rows$ } = await createEosioShipReader(eosioShipReaderConfig)
+  const { blocks$, close$, errors$, rows$ } = await createEosioShipReader(eosioShipReaderConfig)
 
   errors$.subscribe((e: ErrorEvent) => console.log(e))
 
@@ -86,8 +87,6 @@ const initReader = async () => {
   })
 
   close$.subscribe(() => console.log('connection closed'))
-
-  start()
 }
 
 initReader()
