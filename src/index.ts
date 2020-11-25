@@ -64,6 +64,7 @@ export const createEosioShipReader = async ({
   const traces$ = new Subject<ShipTransactionTrace>()
   const rows$ = new Subject<EosioShipTableRow>()
   const forks$ = new Subject<number>()
+  const abis$ = new Subject<RpcInterfaces.Abi>()
   const log$ = new Subject<EosioShipReaderInfo>()
 
   // create socket connection with nodeos ship and push event data through rx subjects
@@ -257,5 +258,6 @@ export const createEosioShipReader = async ({
     close$,
     errors$,
     log$,
+    abis$,
   }
 }

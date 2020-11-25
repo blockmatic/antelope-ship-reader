@@ -4,10 +4,9 @@
 
 This package allows you to subscribe to JSON streams of EOSIO state data and events in NodeJS applications whitout dealing with all the complexity. By connecting to the EOSIO State History websocket and deserializing it's binary messages using nodejs worker_threads to parellalize desearialization execution we are able to acomplish real-time performance.
 
-*This is project is still on it's alpha state, you can reach us out on telegram for more information* 
+_This is project is still on it's alpha state, you can reach us out on telegram for more information_
 
 https://t.me/blockmatic
-
 
 ## Understanding ABIs
 
@@ -118,7 +117,9 @@ const eosioShipReaderConfig: EosioShipReaderConfig = {
   },
 }
 
-const { start, blocks$, rows$ } = createEosioShipReader(eosioShipReaderConfig)
+const { start, blocks$, rows$, abis$ } = createEosioShipReader(
+  eosioShipReaderConfig,
+)
 
 // stream of deserialized block data
 blocks$.subscribe((blockData: EosioShipBlock) => {
@@ -130,6 +131,11 @@ blocks$.subscribe((blockData: EosioShipBlock) => {
 // stream of table row deltas
 rows$.subscribe((rowDelta: EosioShipRowDelta) => {
   console.log(rowDelta)
+})
+
+// stream of smart contract abis
+abis$.subscribe((abi: RpcInterfaces.Abi) => {
+  console.log(abi)
 })
 ```
 
