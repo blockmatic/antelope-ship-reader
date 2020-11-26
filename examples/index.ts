@@ -1,4 +1,4 @@
-import { EosioShipReaderConfig, EosioShipRowDelta, EosioShipReaderInfo } from '../src/types'
+import { EosioShipReaderConfig, EosioShipReaderInfo, ShipBlockData } from '../src/types'
 import { ErrorEvent } from 'ws'
 import { createEosioShipReader } from '../src/index'
 import fetch from 'node-fetch'
@@ -21,7 +21,7 @@ const initReader = async () => {
   const eosioShipReaderConfig: EosioShipReaderConfig = {
     ws_url: 'ws://localhost:8080',
     ds_threads: 4,
-    ds_experimental: true,
+    ds_experimental: false,
     delta_whitelist: [
       'account_metadata',
       'contract_table',
@@ -31,6 +31,7 @@ const initReader = async () => {
       'resource_limits_state',
     ],
     table_rows_whitelist: [
+      { code: 'eosio.token', table: 'accounts' },
       { code: 'bitcashtests', scope: 'bitcashtests', table: 'appstates' },
       { code: 'bitcashtests', scope: 'bitcashtests', table: 'exfees' },
       { code: 'bitcashtests', scope: 'bitcashtests', table: 'fees' },
@@ -59,11 +60,11 @@ const initReader = async () => {
     auto_start: true,
   }
 
-  const { blocks$, close$, errors$, rows$, log$ } = await createEosioShipReader(eosioShipReaderConfig)
+  const { blocks$, close$, errors$, log$ } = await createEosioShipReader(eosioShipReaderConfig)
 
   // stream of block data
-  blocks$.subscribe(() => {
-    // console.log(blockData)
+  blocks$.subscribe((blockData: ShipBlockData) => {
+    console.log(blockData)
     process.exit(1)
   })
 
@@ -71,7 +72,7 @@ const initReader = async () => {
   log$.subscribe((logInfo: EosioShipReaderInfo) => console.log(logInfo))
 
   // stream of whitelist table row deltas
-  rows$.subscribe((rowDelta: EosioShipRowDelta) => console.log(rowDelta))
+  // rows$.subscribe((rowDelta: EosioShipRowDelta) => console.log(rowDelta))
 
   errors$.subscribe((e: ErrorEvent) => console.log(e))
 
