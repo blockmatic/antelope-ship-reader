@@ -154,7 +154,7 @@ Read the [contributing guidelines](https://developers.blockmatic.io) for details
 
 ## Credits
 
-This project leverages deserialization code and patterns from other projects such as EOSIO Contract API, Hyperion, Chronicle and EOSDac state reader.
+This project leverages deserialization patterns from other projects such as EOSIO Contract API, Hyperion, Chronicle and EOSDac state reader.
 
 ## Contributors ✨
 

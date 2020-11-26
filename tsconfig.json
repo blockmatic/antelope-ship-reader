@@ -2,7 +2,7 @@
   "extends": "./node_modules/@blockmatic/tsconfig/tsconfig.nodejs.json",
   "compilerOptions": {
     "outDir": "dist/",
-    "target": "es6",
+    "target": "es2016",
     "lib": ["es6"],
     "moduleResolution": "node",
     "strict": true,

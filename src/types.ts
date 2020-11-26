@@ -12,11 +12,6 @@ export interface EosioShipRequest {
   fetch_deltas?: boolean
 }
 
-export interface EosioShipReaderAbi {
-  code: string
-  abi: RpcInterfaces.Abi[]
-}
-
 export interface EosioShipAction {
   code: string
   action: string
@@ -30,9 +25,11 @@ export interface EosioShipReaderConfig {
   delta_whitelist?: ShipTableDeltaName[]
   table_rows_whitelist?: EosioShipTableRow[]
   actions_whitelist?: EosioShipAction[]
-  contract_abis?: EosioShipReaderAbi[]
+  contract_abis?: EosioContractAbisMap
   auto_start?: boolean
 }
+
+export type EosioContractAbisMap = Map<string, RpcInterfaces.Abi>
 
 export type EosioShipTypes = Map<string, Serialize.Type>
 

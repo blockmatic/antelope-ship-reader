@@ -1,4 +1,4 @@
-import { EosioShipReaderConfig, EosioShipReaderInfo, ShipBlockData } from '../src/types'
+import { EosioContractAbisMap, EosioShipReaderConfig, EosioShipReaderInfo, ShipBlockData } from '../src/types'
 import { ErrorEvent } from 'ws'
 import { createEosioShipReader } from '../src/index'
 import fetch from 'node-fetch'
@@ -17,6 +17,9 @@ const rpcPromise = Promise.all(eosioRpcRequests)
 
 const initReader = async () => {
   const [info, bitcashtestsAbi] = await rpcPromise
+
+  const contract_abis: EosioContractAbisMap = new Map()
+  contract_abis.set('bitcashtests', bitcashtestsAbi)
 
   const eosioShipReaderConfig: EosioShipReaderConfig = {
     ws_url: 'ws://localhost:8080',
@@ -41,12 +44,7 @@ const initReader = async () => {
       { code: 'bitcashtests', scope: 'bitcashtests', table: 'positions' },
       { code: 'bitcashtests', scope: 'bitcashtests', table: 'stat' },
     ],
-    contract_abis: [
-      {
-        code: 'bitcashtests',
-        abi: bitcashtestsAbi,
-      },
-    ],
+    contract_abis,
     request: {
       start_block_num: info.head_block_num,
       end_block_num: 0xffffffff,

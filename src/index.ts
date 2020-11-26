@@ -47,13 +47,10 @@ export const createEosioShipReader = async ({
   auto_start,
 }: EosioShipReaderConfig) => {
   // check if the contact abis were provided
-  const contractNames = [...new Set(table_rows_whitelist?.map((row) => row.code))]
-  const missingAbis = contractNames.filter(
-    (contractName) =>
-      !contract_abis?.find(({ code }) => {
-        return contractName === code || systemContracts.indexOf(contractName) !== -1
-      }),
+  const contractNames = [...new Set(table_rows_whitelist?.map((row) => row.code))].filter(
+    (name) => systemContracts.indexOf(name) === -1,
   )
+  const missingAbis = contractNames.filter((name) => !contract_abis?.get(name))
 
   if (missingAbis.length > 0) {
     throw new Error(`Missing abis for the following contracts ${missingAbis.toString()} in eosio-ship-reader `)
@@ -87,8 +84,8 @@ export const createEosioShipReader = async ({
   const log$ = new Subject<EosioShipReaderInfo>()
 
   // load types
-  if (ds_experimental && contract_abis && contract_abis.length > 0) {
-    contract_abis.forEach((contract) => nodeAbieos.load_abi(contract.code, JSON.stringify(contract.abi)))
+  if (ds_experimental && contract_abis) {
+    contract_abis.forEach((contractAbi, contractName) => nodeAbieos.load_abi(contractName, JSON.stringify(contractAbi)))
   }
 
   // create socket connection with nodeos ship and push event data through rx subjects
@@ -121,8 +118,8 @@ export const createEosioShipReader = async ({
     unconfirmedMessages = 0
     lastBlock = 0
     nodeAbieos.delete_contract('eosio')
-    if (ds_experimental && contract_abis && contract_abis.length > 0) {
-      contract_abis.forEach(({ code }) => nodeAbieos.delete_contract(code))
+    if (ds_experimental && contract_abis) {
+      contract_abis.forEach((_contractAbi, contractName) => nodeAbieos.delete_contract(contractName))
     }
   }
 
@@ -140,7 +137,7 @@ export const createEosioShipReader = async ({
     abi = JSON.parse(message as string) as RpcInterfaces.Abi
     types = Serialize.getTypesFromAbi(Serialize.createInitialTypes(), abi) as EosioShipTypes
 
-    nodeAbieos.load_abi('eosio', message as string)
+    if (ds_experimental) nodeAbieos.load_abi('eosio', message as string)
 
     // initialize deserialization worker threads once abi is ready
     log$.next({ message: 'Initializing deserialization worker pool', data: { ds_threads } })
@@ -172,10 +169,10 @@ export const createEosioShipReader = async ({
       deltas.map(async (delta: any) => {
         if (delta[0] !== 'table_delta_v0') throw Error(`Unsupported table delta type received ${delta[0]}`)
 
-        // only process whitelisted deltas
+        // only process whitelisted deltas, return if not in delta_whitelist
         if (delta_whitelist?.indexOf(delta[1].name) === -1) return delta
 
-        const deserialized = await deserializationWorkers.exec(
+        const deserializedDelta = await deserializationWorkers.exec(
           delta[1].rows.map((row: any) => ({
             type: delta[1].name,
             data: row.data,
@@ -183,28 +180,44 @@ export const createEosioShipReader = async ({
           })),
         )
 
-        if (!deserialized.success) throw new Error(deserialized.message)
+        if (!deserializedDelta.success) throw new Error(deserializedDelta.message)
 
         return [
           delta[0],
           {
             ...delta[1],
             rows: delta[1].rows.map((row: any, index: number) => {
-              const rowdata = deserialized.data[index]
-              const contractRowWhitelisted = !!table_rows_whitelist?.find((tableRow) => {
-                return tableRow.code === rowdata.code && tableRow.scope === rowdata.scope && tableRow.table === rowdata.table
+              const deserializedRowData = deserializedDelta.data[index]
+
+              // return if it's not a contract row delta such as resource_usage_v0
+              if (deserializedRowData[0] !== 'contract_row_v0') return { ...row, data }
+
+              // deserialize whitelisted table row deltas
+              const tableWhitelisted = table_rows_whitelist?.find((tableRow) => {
+                return (
+                  tableRow.code === deserializedRowData.code &&
+                  (!tableRow.scope || tableRow.scope === deserializedRowData.scope) &&
+                  tableRow.table === deserializedRowData.table
+                )
               })
 
-              if (contractRowWhitelisted) {
-                // console.log({ contractRowWhitelisted, data })
-                // TODO: deserialize whitelisted table deltas
-                // const tableDataValue = deserialize(type, contractRow[1].value);
+              if (tableWhitelisted) {
+                const contractAbi = contract_abis?.get(tableWhitelisted.code)
+                if (!contractAbi) throw new Error(`Unable to find a contract abi for ${tableWhitelisted.code}`)
+
+                const contractTableType = contractAbi?.tables.find(({ name }) => name === tableWhitelisted.table)
+
+                console.log('whitelisted contract', { contractAbi, contractTableType })
+                //   const tableDataValue = deserialize({
+                //     code: tableWhitelisted.code,
+                //     type: contractTableType,
+                //     data: deserializedRowData[1].value,
+                //     types: contractAbi?.types,
+                //     ds_experimental,
+                //   })
               }
 
-              return {
-                ...row,
-                data,
-              }
+              return { ...row, data }
             }),
           },
         ]
