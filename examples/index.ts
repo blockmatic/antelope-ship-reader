@@ -1,25 +1,41 @@
-import { EosioContractAbisMap, EosioShipReaderConfig, EosioShipReaderInfo, ShipBlockData } from '../src/types'
+import { EosioContractAbisMap, EosioShipReaderConfig, EosioShipReaderInfo, EosioShipTableRow, ShipBlockData } from '../src/types'
 import { ErrorEvent } from 'ws'
 import { createEosioShipReader } from '../src/index'
 import fetch from 'node-fetch'
+import { RpcInterfaces } from 'eosjs'
 
 const eosioApi = 'http://127.0.0.1:8888'
-const eosioRpcRequests = [
-  fetch(`${eosioApi}/v1/chain/get_info`).then((res: any) => res.json()),
+
+const fecthAbi = (account_name: string) =>
   fetch(`${eosioApi}/v1/chain/get_abi`, {
     method: 'POST',
     body: JSON.stringify({
-      account_name: 'bitcashtests',
+      account_name,
     }),
-  }).then((res: any) => res.json()),
+  }).then(async (res: any) => ({
+    account_name,
+    abi: (await res.json()) as RpcInterfaces.Abi,
+  }))
+
+const table_rows_whitelist: EosioShipTableRow[] = [
+  { code: 'eosio.token', table: 'accounts' },
+  { code: 'bitcashtests', scope: 'bitcashtests', table: 'appstates' },
+  { code: 'bitcashtests', scope: 'bitcashtests', table: 'exfees' },
+  { code: 'bitcashtests', scope: 'bitcashtests', table: 'fees' },
+  { code: 'bitcashtests', scope: 'bitcashtests', table: 'accounts' },
+  { code: 'bitcashtests', scope: 'bitcashtests', table: 'gpositions' },
+  { code: 'bitcashtests', scope: 'bitcashtests', table: 'limits' },
+  { code: 'bitcashtests', scope: 'bitcashtests', table: 'positions' },
+  { code: 'bitcashtests', scope: 'bitcashtests', table: 'stat' },
 ]
-const rpcPromise = Promise.all(eosioRpcRequests)
 
 const initReader = async () => {
-  const [info, bitcashtestsAbi] = await rpcPromise
+  const info = await fetch(`${eosioApi}/v1/chain/get_info`).then((res: any) => res.json())
+  const uniqueContractNames = [...new Set(table_rows_whitelist?.map((row) => row.code))]
+  const abisArr = await Promise.all(uniqueContractNames.map((account_name) => fecthAbi(account_name)))
 
   const contract_abis: EosioContractAbisMap = new Map()
-  contract_abis.set('bitcashtests', bitcashtestsAbi)
+  abisArr.forEach(({ account_name, abi }) => contract_abis.set(account_name, abi))
 
   const eosioShipReaderConfig: EosioShipReaderConfig = {
     ws_url: 'ws://localhost:8080',
@@ -33,17 +49,7 @@ const initReader = async () => {
       'resource_usage',
       'resource_limits_state',
     ],
-    table_rows_whitelist: [
-      { code: 'eosio.token', table: 'accounts' },
-      { code: 'bitcashtests', scope: 'bitcashtests', table: 'appstates' },
-      { code: 'bitcashtests', scope: 'bitcashtests', table: 'exfees' },
-      { code: 'bitcashtests', scope: 'bitcashtests', table: 'fees' },
-      { code: 'bitcashtests', scope: 'bitcashtests', table: 'accounts' },
-      { code: 'bitcashtests', scope: 'bitcashtests', table: 'gpositions' },
-      { code: 'bitcashtests', scope: 'bitcashtests', table: 'limits' },
-      { code: 'bitcashtests', scope: 'bitcashtests', table: 'positions' },
-      { code: 'bitcashtests', scope: 'bitcashtests', table: 'stat' },
-    ],
+    table_rows_whitelist,
     contract_abis,
     request: {
       start_block_num: info.head_block_num,

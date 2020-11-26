@@ -1,4 +1,18 @@
 import { RpcInterfaces, Serialize } from 'eosjs'
+import { StaticPool } from 'node-worker-threads-pool'
+import PQueue from 'p-queue'
+import WebSocket from 'ws'
+
+export type EosioShipReaderState = {
+  socket: WebSocket | null
+  eosioAbi: RpcInterfaces.Abi | null
+  eosioTypes: EosioShipTypes | null
+  deserializationWorkers: StaticPool<DeserializerMessageParams[], any> | null
+  unconfirmedMessages: number
+  lastBlock: number
+  blocksQueue: PQueue
+  shipRequest: EosioShipRequest
+}
 
 export type Types = Map<string, Serialize.Type>
 export interface EosioShipRequest {

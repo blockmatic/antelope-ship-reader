@@ -13,7 +13,7 @@
     "src"
   ],
   "scripts": {
-    "dev": "tsc && ts-node-dev --no-deps --respawn examples/index",
+    "dev": "yarn build && ts-node-dev --no-deps --respawn examples/index",
     "build": "rimraf dist && tsc",
     "lint": "eslint --ignore-path .gitignore \"**/*.+(js|ts|tsx)\"",
     "format": "prettier --ignore-path .gitignore --write \"**/*.+(js|json|ts|tsx)\"",
