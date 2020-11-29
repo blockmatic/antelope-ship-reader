@@ -205,8 +205,7 @@ export const createEosioShipReader = async ({
               const tableDeserializationAbi =
                 tableWhitelisted.code === 'eosio' ? state.eosioAbi! : contract_abis.get(tableWhitelisted.code)
               if (!tableDeserializationAbi) {
-                log$.next({ message: 'Table deserialization abi not found' })
-                // throw new Error('Table deserialization abi not found')
+                throw new Error('Table deserialization abi not found')
               }
 
               const tableDeserializationTypes =
@@ -216,24 +215,24 @@ export const createEosioShipReader = async ({
               )
 
               if (!tableDeserializationTypes || !tableDeserializationType) {
-                log$.next({ message: 'Table deserialization types not found' })
-                // throw new Error('Table deserialization types not found')
+                throw new Error('Table deserialization types not found')
               }
+
+              // const tableDataValue = deserialize({
+              //   code: tableWhitelisted.code,
+              //   type: tableDeserializationType.name,
+              //   data: deserializedRowData[1].value,
+              //   types: tableDeserializationTypes as EosioShipTypes,
+              //   ds_experimental,
+              // })
 
               // console.log({
               //   tableWhitelisted,
               //   tableDeserializationAbi,
               //   tableDeserializationType,
               //   tableDeserializationTypes,
+              //   tableDataValue
               // })
-
-              //   const tableDataValue = deserialize({
-              //     code: tableWhitelisted.code,
-              //     type: contractTableType,
-              //     data: deserializedRowData[1].value,
-              //     types: contractAbi?.types,
-              //     ds_experimental,
-              //   })
 
               return { ...row, data: deserializedRowData }
             }),

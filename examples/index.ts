@@ -12,10 +12,13 @@ const fecthAbi = (account_name: string) =>
     body: JSON.stringify({
       account_name,
     }),
-  }).then(async (res: any) => ({
-    account_name,
-    abi: (await res.json()) as RpcInterfaces.Abi,
-  }))
+  }).then(async (res: any) => {
+    const response = await res.json()
+    return {
+      account_name,
+      abi: response.abi as RpcInterfaces.Abi,
+    }
+  })
 
 const table_rows_whitelist: EosioShipTableRow[] = [
   { code: 'eosio.token', table: 'accounts' },
