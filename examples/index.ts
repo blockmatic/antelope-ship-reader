@@ -67,7 +67,7 @@ const initReader = async () => {
     auto_start: true,
   }
 
-  const { blocks$, close$, errors$, log$ } = await createEosioShipReader(eosioShipReaderConfig)
+  const { blocks$, close$, errors$, log$, rows$ } = await createEosioShipReader(eosioShipReaderConfig)
 
   // stream of block data
   blocks$.subscribe((blockData: ShipBlockData) => {
@@ -75,7 +75,10 @@ const initReader = async () => {
     process.exit(1)
   })
 
-  // eosio-ship-reader log info
+  rows$.subscribe((row: EosioShipTableRow) => {
+    console.log(JSON.stringify(row, null, 2))
+  })
+
   log$.subscribe((logInfo: EosioShipReaderInfo) => console.log(logInfo))
 
   // stream of whitelist table row deltas
