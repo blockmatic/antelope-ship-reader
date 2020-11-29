@@ -211,14 +211,21 @@ export const createEosioShipReader = async ({
 
               const tableDeserializationTypes =
                 tableWhitelisted.code === 'eosio' ? state.eosioTypes : contract_abis.get(tableWhitelisted.code)?.types
-              const tableDeserializationType = tableDeserializationAbi?.tables?.find(({ name }) => name === tableWhitelisted.code)
-
-              // console.log({tableWhitelisted, tableDeserializationAbi, tableDeserializationType, tableDeserializationTypes})
+              const tableDeserializationType = tableDeserializationAbi?.tables?.find(
+                ({ name }) => name === tableWhitelisted.table,
+              )
 
               if (!tableDeserializationTypes || !tableDeserializationType) {
                 log$.next({ message: 'Table deserialization types not found' })
                 // throw new Error('Table deserialization types not found')
               }
+
+              // console.log({
+              //   tableWhitelisted,
+              //   tableDeserializationAbi,
+              //   tableDeserializationType,
+              //   tableDeserializationTypes,
+              // })
 
               //   const tableDataValue = deserialize({
               //     code: tableWhitelisted.code,
