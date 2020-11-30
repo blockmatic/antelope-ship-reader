@@ -53,7 +53,7 @@ export const loadReader = async () => {
     table_rows_whitelist,
     contract_abis,
     request: {
-      start_block_num: info.head_block_num + 10, // TODO: handle real-time sync, initialization takes while...
+      start_block_num: info.head_block_num,
       end_block_num: 0xffffffff,
       max_messages_in_flight: 50,
       have_positions: [],
