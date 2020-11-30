@@ -33,26 +33,17 @@ const defaultShipRequest: EosioShipRequest = {
   fetch_deltas: true,
 }
 
-export const createEosioShipReader = async ({
-  ws_url,
-  request,
-  ds_threads,
-  ds_experimental,
-  delta_whitelist,
-  table_rows_whitelist,
-  actions_whitelist,
-  contract_abis,
-  auto_start,
-}: EosioShipReaderConfig) => {
+export const createEosioShipReader = async (config: EosioShipReaderConfig) => {
   // check if the contact abis were provided
-  const contractNames = [...new Set(table_rows_whitelist?.map((row) => row.code))]
-  const missingAbis = contractNames.filter((name) => !contract_abis?.get(name))
+  const contractNames = [...new Set(config.table_rows_whitelist?.map((row) => row.code))]
+  const missingAbis = contractNames.filter((name) => !config.contract_abis?.get(name))
 
   if (missingAbis.length > 0) {
     throw new Error(`Missing abis for the following contracts ${missingAbis.toString()} in eosio-ship-reader `)
   }
+
   // TODO: get missing abis from nodeos rpc ?
-  if (ds_experimental && !nodeAbieos) throw new Error('Only Linux is supported by abieos')
+  if (config.ds_experimental && !nodeAbieos) throw new Error('Only Linux is supported by abieos')
 
   // eosio-ship-reader state
   const state: EosioShipReaderState = {
@@ -63,7 +54,7 @@ export const createEosioShipReader = async ({
     unconfirmedMessages: 0,
     lastBlock: 0,
     blocksQueue: new PQueue({ concurrency: 1 }),
-    shipRequest: { ...defaultShipRequest, ...request },
+    shipRequest: { ...defaultShipRequest, ...config.request },
   }
 
   // create rxjs subjects
@@ -81,13 +72,13 @@ export const createEosioShipReader = async ({
   const log$ = new Subject<EosioShipReaderInfo>()
 
   // load types
-  if (ds_experimental && contract_abis) {
-    contract_abis.forEach((contractAbi, contractName) => nodeAbieos.load_abi(contractName, JSON.stringify(contractAbi)))
+  if (config.ds_experimental && config.contract_abis) {
+    config.contract_abis.forEach((contractAbi, contractName) => nodeAbieos.load_abi(contractName, JSON.stringify(contractAbi)))
   }
 
   // create socket connection with nodeos ship and push event data through rx subjects
   const connectSocket = () => {
-    state.socket = new WebSocket(ws_url, { perMessageDeflate: false })
+    state.socket = new WebSocket(config.ws_url, { perMessageDeflate: false })
     state.socket.on('open', (e: OpenEvent) => open$.next(e))
     state.socket.on('close', (e: CloseEvent) => close$.next(e))
     state.socket.on('error', (e: ErrorEvent) => errors$.next(e))
@@ -114,9 +105,9 @@ export const createEosioShipReader = async ({
     stop()
     state.unconfirmedMessages = 0
     state.lastBlock = 0
-    if (ds_experimental && contract_abis) {
+    if (config.ds_experimental && config.contract_abis) {
       nodeAbieos.delete_contract('eosio')
-      contract_abis.forEach((_contractAbi, contractName) => nodeAbieos.delete_contract(contractName))
+      config.contract_abis.forEach((_contractAbi, contractName) => nodeAbieos.delete_contract(contractName))
     }
   }
 
@@ -134,17 +125,17 @@ export const createEosioShipReader = async ({
     state.eosioAbi = JSON.parse(message as string) as RpcInterfaces.Abi
     state.eosioTypes = Serialize.getTypesFromAbi(Serialize.createInitialTypes(), state.eosioAbi) as EosioShipTypes
 
-    if (ds_experimental) nodeAbieos.load_abi('eosio', message as string)
+    if (config.ds_experimental) nodeAbieos.load_abi('eosio', message as string)
 
     // initialize deserialization worker threads once abi is ready
-    log$.next({ message: 'Initializing deserialization worker pool', data: { ds_threads } })
+    log$.next({ message: 'Initializing deserialization worker pool', data: { ds_threads: config.ds_threads } })
     state.deserializationWorkers = new StaticPool({
-      size: ds_threads,
+      size: config.ds_threads,
       task: './dist/deserializer.js',
       workerData: {
         abi: state.eosioAbi,
-        contract_abis, // Array.from(contract_abis!), // use Array, with Map you get DataCloneError: #<Promise> could not be cloned.
-        ds_experimental,
+        contract_abis: config.contract_abis, // Array.from(contract_abis!), // use Array, with Map you get DataCloneError: #<Promise> could not be cloned.
+        ds_experimental: config.ds_experimental,
       },
     })
 
@@ -167,7 +158,7 @@ export const createEosioShipReader = async ({
         if (delta[0] !== 'table_delta_v0') throw Error(`Unsupported table delta type received ${delta[0]}`)
 
         // only process whitelisted deltas, return if not in delta_whitelist
-        if (delta_whitelist?.indexOf(delta[1].name) === -1) return delta
+        if (config.delta_whitelist?.indexOf(delta[1].name) === -1) return delta
 
         const deserializedDelta = await state.deserializationWorkers?.exec(
           delta[1].rows.map((row: any) => ({
@@ -190,7 +181,7 @@ export const createEosioShipReader = async ({
               if (deserializedRowData[0] !== 'contract_row_v0') return { ...row, data: deserializedRowData }
 
               // check if the table is whitelisted
-              const tableWhitelisted = table_rows_whitelist?.find((tableRow) => {
+              const tableWhitelisted = config.table_rows_whitelist?.find((tableRow) => {
                 return (
                   tableRow.code === deserializedRowData[1].code &&
                   (!tableRow.scope || tableRow.scope === deserializedRowData[1].scope) &&
@@ -199,11 +190,12 @@ export const createEosioShipReader = async ({
               })
 
               // return if the table is not whitelisted
-              if (!tableWhitelisted || !contract_abis) return { ...row, data: deserializedRowData }
+              // TODO: review config.contract_abis check
+              if (!tableWhitelisted || !config.contract_abis) return { ...row, data: deserializedRowData }
 
               // get the correct abi and types for table deserialization
               const tableDeserializationAbi =
-                tableWhitelisted.code === 'eosio' ? state.eosioAbi! : contract_abis.get(tableWhitelisted.code)
+                tableWhitelisted.code === 'eosio' ? state.eosioAbi! : config.contract_abis.get(tableWhitelisted.code)
               if (!tableDeserializationAbi) {
                 throw new Error('Table deserialization abi not found')
               }
@@ -227,7 +219,7 @@ export const createEosioShipReader = async ({
                 type: tableDeserializationType,
                 data: deserializedRowData[1].value,
                 types: tableDeserializationTypes as EosioShipTypes,
-                ds_experimental,
+                ds_experimental: config.ds_experimental,
               })
 
               rows$.next({ ...row, data: deserializedRowData })
@@ -248,7 +240,7 @@ export const createEosioShipReader = async ({
       type: 'result',
       data: message,
       types: state.eosioTypes,
-      ds_experimental,
+      ds_experimental: config.ds_experimental,
     })
 
     if (type !== 'get_blocks_result_v0') {
@@ -332,7 +324,7 @@ export const createEosioShipReader = async ({
   })
 
   // auto start
-  if (auto_start) start()
+  if (config.auto_start) start()
 
   // eosio-ship-reader api
   return {
