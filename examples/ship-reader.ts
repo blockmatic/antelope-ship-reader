@@ -1,10 +1,8 @@
-import { EosioContractAbisMap, EosioShipReaderConfig, EosioShipReaderInfo, EosioShipTableRow, ShipBlockData } from '../src/types'
-import { ErrorEvent } from 'ws'
-import { createEosioShipReader } from '../src/index'
+import { createEosioShipReader, EosioContractAbisMap, EosioShipReaderConfig, EosioShipTableRow } from '../src'
 import fetch from 'node-fetch'
 import { RpcInterfaces } from 'eosjs'
 
-const eosioApi = 'http://127.0.0.1:8888'
+const eosioApi = 'http://localhost:8888'
 
 const fecthAbi = (account_name: string) =>
   fetch(`${eosioApi}/v1/chain/get_abi`, {
@@ -32,7 +30,7 @@ const table_rows_whitelist: EosioShipTableRow[] = [
   { code: 'bitcashtests', scope: 'bitcashtests', table: 'stat' },
 ]
 
-const initReader = async () => {
+export const loadReader = async () => {
   const info = await fetch(`${eosioApi}/v1/chain/get_info`).then((res: any) => res.json())
   const uniqueContractNames = [...new Set(table_rows_whitelist?.map((row) => row.code))]
   const abisArr = await Promise.all(uniqueContractNames.map((account_name) => fecthAbi(account_name)))
@@ -55,7 +53,7 @@ const initReader = async () => {
     table_rows_whitelist,
     contract_abis,
     request: {
-      start_block_num: info.head_block_num,
+      start_block_num: info.head_block_num + 10, // TODO: handle real-time sync, initialization takes while...
       end_block_num: 0xffffffff,
       max_messages_in_flight: 50,
       have_positions: [],
@@ -67,26 +65,5 @@ const initReader = async () => {
     auto_start: true,
   }
 
-  const { blocks$, close$, errors$, log$, rows$ } = await createEosioShipReader(eosioShipReaderConfig)
-
-  // stream of block data
-  blocks$.subscribe((blockData: ShipBlockData) => {
-    console.log(blockData)
-    process.exit(1)
-  })
-
-  rows$.subscribe((row: EosioShipTableRow) => {
-    console.log(JSON.stringify(row, null, 2))
-  })
-
-  log$.subscribe((logInfo: EosioShipReaderInfo) => console.log(logInfo))
-
-  // stream of whitelist table row deltas
-  // rows$.subscribe((rowDelta: EosioShipRowDelta) => console.log(rowDelta))
-
-  errors$.subscribe((e: ErrorEvent) => console.log(e))
-
-  close$.subscribe(() => console.log('connection closed'))
+  return await createEosioShipReader(eosioShipReaderConfig)
 }
-
-initReader()

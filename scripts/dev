@@ -1,0 +1,4 @@
+#!/bin/sh
+
+yarn build && ts-node-dev --no-deps --respawn examples/$*
+
