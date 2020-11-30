@@ -56,13 +56,25 @@ export interface EosioShipReaderInfo {
 
 export type ShipBlockData = any
 
-export type EosioShipTableRow = {
+export interface EosioShipTableRow {
   code: string
   scope?: string
   table: string
   json?: boolean
   lower_bound?: string
   upper_bound?: string
+}
+
+export interface EosioShipTableRowData {
+  block_num: number
+  block_id: string
+  present: string
+  code: string
+  scope: string
+  table: string
+  primary_key: string
+  payer: string
+  value: any
 }
 
 export type EosioShipRowDelta = any
