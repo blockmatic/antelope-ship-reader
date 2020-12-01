@@ -131,10 +131,10 @@ export const createEosioShipReader = async (config: EosioShipReaderConfig) => {
     log$.next({ message: 'Initializing deserialization worker pool', data: { ds_threads: config.ds_threads } })
     state.deserializationWorkers = new StaticPool({
       size: config.ds_threads,
-      task: './dist/deserializer.js',
+      task: `${__dirname}/../dist/deserializer.js`,
       workerData: {
         abi: state.eosioAbi,
-        contract_abis: config.contract_abis, // Array.from(contract_abis!), // use Array, with Map you get DataCloneError: #<Promise> could not be cloned.
+        contract_abis: config.contract_abis,
         ds_experimental: config.ds_experimental,
       },
     })

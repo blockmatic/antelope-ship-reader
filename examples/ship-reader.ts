@@ -2,7 +2,8 @@ import { createEosioShipReader, EosioContractAbisMap, EosioShipReaderConfig, Eos
 import fetch from 'node-fetch'
 import { RpcInterfaces } from 'eosjs'
 
-const eosioApi = 'http://localhost:8888'
+const eosioHost = process.env.EOSIO_HOST || 'localhost'
+const eosioApi = `http://${eosioHost}:8888`
 
 const fecthAbi = (account_name: string) =>
   fetch(`${eosioApi}/v1/chain/get_abi`, {
@@ -39,7 +40,7 @@ export const loadReader = async () => {
   abisArr.forEach(({ account_name, abi }) => contract_abis.set(account_name, abi))
 
   const eosioShipReaderConfig: EosioShipReaderConfig = {
-    ws_url: 'ws://localhost:8080',
+    ws_url: `ws://${eosioHost}:8080`,
     ds_threads: 4,
     ds_experimental: false,
     delta_whitelist: [
