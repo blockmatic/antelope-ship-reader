@@ -8,9 +8,9 @@ const run = async () => {
 
   setInterval(async () => {
     info = await getInfo()
-  }, 450)
+  }, 490)
 
-  log$.subscribe((logInfo: EosioShipReaderInfo) => console.log(logInfo.message, info.head_block_num))
+  log$.subscribe((logInfo: EosioShipReaderInfo) => console.log(logInfo.message, `nodeos head_block_num ${info.head_block_num}`))
 
   close$.subscribe(() => console.log('connection closed'))
 }
