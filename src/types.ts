@@ -85,6 +85,12 @@ export type DeserializerMessageParams = {
   data: Uint8Array | string
 }
 
+export interface DeserializerWorkerData {
+  abi: RpcInterfaces.Abi
+  contract_abis: EosioContractAbisMap
+  ds_experimental: boolean
+}
+
 // ==============================================================
 
 export declare type EosTable = {

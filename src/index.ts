@@ -15,6 +15,7 @@ import {
   ShipTableDelta,
   EosioAction,
   EosioShipReaderState,
+  DeserializerMessageParams,
 } from './types'
 import { serialize } from './serializer'
 import { StaticPool } from 'node-worker-threads-pool'
@@ -144,8 +145,14 @@ export const createEosioShipReader = async (config: EosioShipReaderConfig) => {
   })
 
   // ------------------ handle deserialization --------------------
+
+  const execDeserializer = (deserializerParams: DeserializerMessageParams[]) => {
+    // This will choose one idle worker in the pool and deserialize whithout blocking the main thread
+    return state.deserializationWorkers?.exec(deserializerParams)
+  }
+
   const deserializeParallel = async (code: string, type: string, data: Uint8Array): Promise<any> => {
-    const result = await state.deserializationWorkers?.exec([{ code, type, data }])
+    const result = await execDeserializer([{ code, type, data }])
     if (!result.success) throw new Error(result.message)
     return result.data[0]
   }
@@ -206,7 +213,7 @@ export const createEosioShipReader = async (config: EosioShipReaderConfig) => {
         // only process whitelisted deltas, return if not in delta_whitelist
         if (config.delta_whitelist?.indexOf(delta[1].name) === -1) return delta
 
-        const deserializedDelta = await state.deserializationWorkers?.exec(
+        const deserializedDelta = await execDeserializer(
           delta[1].rows.map((row: any) => ({
             type: delta[1].name,
             data: row.data,

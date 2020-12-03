@@ -51,6 +51,16 @@ So, to be able to interpret its output, the client software has to have copies o
 
 [Source code of state_history_plugin](https://github.com/EOSIO/eos/blob/master/plugins/state_history_plugin/state_history_plugin.cpp)
 
+## Parallel Deserialization with worker_threads
+
+The nodejs worker_threads module enables the use of threads that execute JavaScript in parallel.
+
+Workers (threads) are useful for performing CPU-intensive JavaScript operations. They will not help much with I/O-intensive work. Node.js’s built-in asynchronous I/O operations are more efficient than Workers can be.
+
+Unlike child_process or cluster, worker_threads can share memory. They do so by transferring ArrayBuffer instances or sharing SharedArrayBuffer instances.
+
+https://nodejs.org/api/worker_threads.html
+
 ## Reactive Programming & RXJS
 
 RxJS is a library for functional reactive programming in JavaScript using Observables to make easier to compose asynchronous or callback-based code. Observables are a representation of any set of values over any amount of time. This is the most basic building block of RxJS.
