@@ -90,6 +90,12 @@ export interface DeserializerWorkerData {
   ds_experimental: boolean
 }
 
+export interface DeserializerResults {
+  success: boolean
+  message?: string
+  data?: any
+}
+
 // TODO: document this approach
 export interface EosioLightBlock {
   chain_id: string

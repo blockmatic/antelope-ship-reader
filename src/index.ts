@@ -16,6 +16,7 @@ import {
   EosioShipReaderState,
   DeserializerMessageParams,
   EosioLightBlock,
+  DeserializerResults,
 } from './types'
 import { serialize } from './serializer'
 import { StaticPool } from 'node-worker-threads-pool'
@@ -146,13 +147,9 @@ export const createEosioShipReader = async (config: EosioShipReaderConfig) => {
 
   // ------------------ handle deserialization --------------------
 
-  const execDeserializer = (deserializerParams: DeserializerMessageParams[]) => {
+  const deserializeParallel = async (deserializerParams: DeserializerMessageParams[]): Promise<any> => {
     // This will choose one idle worker in the pool and deserialize whithout blocking the main thread
-    return state.deserializationWorkers?.exec(deserializerParams)
-  }
-
-  const deserializeParallel = async (code: string, type: string, data: Uint8Array): Promise<any> => {
-    const result = await execDeserializer([{ code, type, data }])
+    const result = (await state.deserializationWorkers?.exec(deserializerParams)) as DeserializerResults
     if (!result.success) throw new Error(result.message)
     return result.data[0]
   }
@@ -204,7 +201,7 @@ export const createEosioShipReader = async (config: EosioShipReaderConfig) => {
   }
 
   const deserializeDeltas = async (data: Uint8Array, block: any): Promise<any> => {
-    const deltas = await deserializeParallel('eosio', 'table_delta[]', data)
+    const deltas = await deserializeParallel([{ code: 'eosio', type: 'table_delta[]', data }])
     const lightRowDeltas: any = []
 
     const processedDeltas = await Promise.all(
@@ -214,7 +211,7 @@ export const createEosioShipReader = async (config: EosioShipReaderConfig) => {
         // only process whitelisted deltas, return if not in delta_whitelist
         if (config.delta_whitelist?.indexOf(delta[1].name) === -1) return delta
 
-        const deserializedDelta = await execDeserializer(
+        const deserializedDelta = await deserializeParallel(
           delta[1].rows.map((row: any) => ({
             type: delta[1].name,
             data: row.data,
@@ -287,13 +284,13 @@ export const createEosioShipReader = async (config: EosioShipReaderConfig) => {
 
     // TODO: review error handling
     if (response.block) {
-      block = await deserializeParallel('eosio', 'signed_block', response.block)
+      block = await deserializeParallel([{ code: 'eosio', type: 'signed_block', data: response.block }])
     } else if (state.shipRequest.fetch_block) {
       log$.next({ message: `Block #${response.this_block.block_num} does not contain block data` })
     }
 
     if (response.traces) {
-      traces = await deserializeParallel('eosio', 'transaction_trace[]', response.traces)
+      traces = await deserializeParallel([{ code: 'eosio', type: 'transaction_trace[]', data: response.traces }])
     } else if (state.shipRequest.fetch_traces) {
       log$.next({ message: `Block #${response.this_block.block_num} does not contain trace data` })
     }
@@ -311,12 +308,7 @@ export const createEosioShipReader = async (config: EosioShipReaderConfig) => {
       head: response.head,
       last_irreversible: response.last_irreversible,
       prev_block: response.prev_block,
-      block: Object.assign(
-        { ...response.this_block },
-        block,
-        { last_irreversible: response.last_irreversible },
-        { head: response.head },
-      ),
+      block,
       traces,
       deltas,
     }
