@@ -2,7 +2,7 @@ import { parentPort, workerData } from 'worker_threads'
 import { TextDecoder, TextEncoder } from 'text-encoding'
 import * as nodeAbieos from '@eosrio/node-abieos'
 import { Serialize } from 'eosjs'
-import { DeserializeParams, DeserializerMessageParams, DeserializerWorkerData, EosioShipTypes } from './types'
+import { DeserializeParams, DeserializerMessageParams, DeserializerWorkerData, EosioTypes } from './types'
 
 export function deserialize({ code, type, data, types, ds_experimental }: DeserializeParams) {
   if (ds_experimental) {
@@ -27,7 +27,7 @@ export function deserialize({ code, type, data, types, ds_experimental }: Deseri
 if (parentPort) {
   const args: DeserializerWorkerData = workerData
 
-  const types = Serialize.getTypesFromAbi(Serialize.createInitialTypes(), args.abi) as EosioShipTypes
+  const types = Serialize.getTypesFromAbi(Serialize.createInitialTypes(), args.abi) as EosioTypes
 
   // You can do any heavy stuff here, in a synchronous way without blocking the "main thread"
   parentPort.on('message', (param: DeserializerMessageParams[]) => {

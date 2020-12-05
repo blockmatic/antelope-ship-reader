@@ -6,7 +6,7 @@ import WebSocket from 'ws'
 export type EosioShipReaderState = {
   socket: WebSocket | null
   eosioAbi: RpcInterfaces.Abi | null
-  eosioTypes: EosioShipTypes | null
+  eosioTypes: EosioTypes | null
   deserializationWorkers: StaticPool<DeserializerMessageParams[], any> | null
   unconfirmedMessages: number
   lastBlock: number
@@ -14,7 +14,6 @@ export type EosioShipReaderState = {
   shipRequest: EosioShipRequest
 }
 
-export type Types = Map<string, Serialize.Type>
 export interface EosioShipRequest {
   start_block_num: number
   end_block_num: number
@@ -45,7 +44,7 @@ export interface EosioShipReaderConfig {
 
 export type EosioContractAbisMap = Map<string, RpcInterfaces.Abi>
 
-export type EosioShipTypes = Map<string, Serialize.Type>
+export type EosioTypes = Map<string, Serialize.Type>
 
 export type EosioShipSocketMessage = string | Uint8Array
 
@@ -89,6 +88,23 @@ export interface DeserializerWorkerData {
   abi: RpcInterfaces.Abi
   contract_abis: EosioContractAbisMap
   ds_experimental: boolean
+}
+
+// TODO: document this approach
+export interface EosioLightBlock {
+  chain_id: string
+  block_num: number
+  block_id: string
+  previous_block_id?: string
+  transactions?: any[] // light transactions
+  actions?: any[] // whitelisted action data
+  table_rows?: any[]
+  abis?: any[] // eosio-ship-sends should handle abi updates.
+}
+
+export interface EosioTableRowsStreamData extends EosioShipTableRowData {
+  chain_id: string
+  transaction_id: string
 }
 
 // ==============================================================
@@ -145,7 +161,7 @@ export interface DeserializeParams {
   code: string
   type: string
   data: Uint8Array | string
-  types: EosioShipTypes
+  types: EosioTypes
   ds_experimental?: boolean
 }
 
