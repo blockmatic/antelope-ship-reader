@@ -10,19 +10,21 @@ import {
   EosioShipSocketMessage,
   EosioShipBlock,
   EosioShipReaderInfo,
-  EosioShipTableRowData,
+  EosioReaderTableRowsStreamData,
   ShipTransactionTrace,
   EosioAction,
   EosioShipReaderState,
   DeserializerMessageParams,
-  EosioLightBlock,
+  EosioReaderLightBlock,
   DeserializerResults,
+  EosioReaderLightTableRow,
 } from './types'
 import { serialize } from './serializer'
 import { StaticPool } from 'node-worker-threads-pool'
 import { deserialize } from './deserializer'
 import * as nodeAbieos from '@eosrio/node-abieos'
 export * from './types'
+import fetch from 'node-fetch'
 
 const defaultShipRequest: EosioShipRequest = {
   start_block_num: 0,
@@ -49,6 +51,7 @@ export const createEosioShipReader = async (config: EosioShipReaderConfig) => {
 
   // eosio-ship-reader state
   const state: EosioShipReaderState = {
+    chain_id: null,
     socket: null,
     eosioAbi: null,
     eosioTypes: null,
@@ -68,7 +71,7 @@ export const createEosioShipReader = async (config: EosioShipReaderConfig) => {
   const deltas$ = new Subject<any>()
   const traces$ = new Subject<ShipTransactionTrace>()
   const actions$ = new Subject<EosioAction>()
-  const rows$ = new Subject<EosioShipTableRowData>()
+  const rows$ = new Subject<EosioReaderTableRowsStreamData>()
   const forks$ = new Subject<number>()
   const abis$ = new Subject<RpcInterfaces.Abi>()
   const log$ = new Subject<EosioShipReaderInfo>()
@@ -76,6 +79,14 @@ export const createEosioShipReader = async (config: EosioShipReaderConfig) => {
   // load types
   if (config.ds_experimental && config.contract_abis) {
     config.contract_abis.forEach((contractAbi, contractName) => nodeAbieos.load_abi(contractName, JSON.stringify(contractAbi)))
+  }
+
+  // get chain_id
+  try {
+    const info = await fetch(`${config.rpc_url}/v1/chain/get_info`).then((res: any) => res.json())
+    state.chain_id = info.chain_id
+  } catch (error) {
+    throw new Error('Cannot get info from rpc endpoint')
   }
 
   // create socket connection with nodeos ship and push event data through rx subjects
@@ -151,7 +162,7 @@ export const createEosioShipReader = async (config: EosioShipReaderConfig) => {
     // This will choose one idle worker in the pool and deserialize whithout blocking the main thread
     const result = (await state.deserializationWorkers?.exec(deserializerParams)) as DeserializerResults
     if (!result.success) throw new Error(result.message)
-    return result.data[0]
+    return result.data
   }
 
   // TODO: types
@@ -202,10 +213,10 @@ export const createEosioShipReader = async (config: EosioShipReaderConfig) => {
 
   const deserializeDeltas = async (data: Uint8Array, block: any): Promise<any> => {
     const deltas = await deserializeParallel([{ code: 'eosio', type: 'table_delta[]', data }])
-    const lightRowDeltas: any = []
+    const lightTableRows: EosioReaderLightTableRow[] = []
 
     const processedDeltas = await Promise.all(
-      deltas.map(async (delta: any) => {
+      deltas[0].map(async (delta: any) => {
         if (delta[0] !== 'table_delta_v0') throw Error(`Unsupported table delta type received ${delta[0]}`)
 
         // only process whitelisted deltas, return if not in delta_whitelist
@@ -219,37 +230,42 @@ export const createEosioShipReader = async (config: EosioShipReaderConfig) => {
           })),
         )
 
-        if (!deserializedDelta.success) throw new Error(deserializedDelta.message)
-
-        const lightRowDelta: any = {
-          name: delta[1].name,
-          rows: [],
-        }
-
         const fullDeltas = [
           delta[0],
           {
             ...delta[1],
             rows: delta[1].rows.map(async (row: any, index: number) => {
-              const deserializedRowData = deserializedDelta.data[index]
+              const deserializedRowData = deserializedDelta[index]
 
               // return if it's not a contract row delta
               if (deserializedRowData[0] !== 'contract_row_v0') return { ...row, data: deserializedRowData }
 
               const [tableRow, whitelisted] = await deserializeTableRow({ block, row, deserializedRowData })
 
-              whitelisted && lightRowDelta.rows.push(tableRow)
+              if (whitelisted) {
+                const lightRow: EosioReaderLightTableRow = {
+                  present: tableRow.present,
+                  ...tableRow.data[1],
+                }
+
+                rows$.next({
+                  chain_id: state.chain_id,
+                  ...block,
+                  ...lightRow,
+                })
+
+                lightTableRows.push(tableRow)
+              }
+
               return tableRow
             }),
           },
         ]
-
-        lightRowDeltas.push(lightRowDelta)
         return fullDeltas
       }),
     )
 
-    return [processedDeltas, lightRowDeltas]
+    return [processedDeltas, lightTableRows]
   }
 
   const deserializeMessage = async (message: EosioShipSocketMessage) => {
@@ -279,8 +295,8 @@ export const createEosioShipReader = async (config: EosioShipReaderConfig) => {
     let traces: any = []
     let deltas: any = []
     // let lightTraces: any = []
-    let lightRowDeltas: any = []
-    const lightBlock: EosioLightBlock = { ...response.this_block, previous_block_id: response.prev_block }
+    let lightTableRows: EosioReaderLightTableRow[]
+    const lightBlock: EosioReaderLightBlock = { ...response.this_block, previous_block_id: response.prev_block }
 
     // TODO: review error handling
     if (response.block) {
@@ -296,9 +312,9 @@ export const createEosioShipReader = async (config: EosioShipReaderConfig) => {
     }
 
     if (response.deltas) {
-      [deltas, lightRowDeltas] = await deserializeDeltas(response.deltas, response.this_block)
-      lightBlock.table_rows = lightRowDeltas
-      if (lightRowDeltas.length > 0) deltas$.next(lightRowDeltas)
+      [deltas, lightTableRows] = await deserializeDeltas(response.deltas, response.this_block)
+      lightBlock.table_rows = lightTableRows
+      if (lightTableRows.length > 0) deltas$.next(lightTableRows)
     } else if (state.shipRequest.fetch_deltas) {
       log$.next({ message: `Block #${response.this_block.block_num} does not contain delta data` })
     }

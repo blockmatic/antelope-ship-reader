@@ -2,7 +2,7 @@ import { parentPort, workerData } from 'worker_threads'
 import { TextDecoder, TextEncoder } from 'text-encoding'
 import * as nodeAbieos from '@eosrio/node-abieos'
 import { Serialize } from 'eosjs'
-import { DeserializeParams, DeserializerMessageParams, DeserializerResults, DeserializerWorkerData, EosioTypes } from './types'
+import { DeserializeParams, DeserializerMessageParams, DeserializerWorkerData, EosioTypes } from './types'
 
 export function deserialize({ code, type, data, types, ds_experimental }: DeserializeParams) {
   if (ds_experimental) {
@@ -41,6 +41,12 @@ if (parentPort) {
 
         result.push(deserialize({ code: row.code, type: row.type, data: row.data, types, ds_experimental: args.ds_experimental }))
       }
+
+      // console.log('------------ SUCCESS ---------------')
+      // result.forEach( (element:any) => {
+      //   console.log(element)
+      // });
+      // console.log('------------------------------------')
 
       return parentPort!.postMessage({ success: true, data: result })
     } catch (e) {

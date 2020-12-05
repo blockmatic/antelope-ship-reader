@@ -4,6 +4,7 @@ import PQueue from 'p-queue'
 import WebSocket from 'ws'
 
 export type EosioShipReaderState = {
+  chain_id: string | null
   socket: WebSocket | null
   eosioAbi: RpcInterfaces.Abi | null
   eosioTypes: EosioTypes | null
@@ -32,6 +33,7 @@ export interface EosioShipAction {
 
 export interface EosioShipReaderConfig {
   ws_url: string
+  rpc_url: string
   ds_threads: number
   ds_experimental?: boolean
   request: EosioShipRequest
@@ -64,18 +66,6 @@ export interface EosioShipTableRow {
   upper_bound?: string
 }
 
-export interface EosioShipTableRowData {
-  block_num: number
-  block_id: string
-  present: string
-  code: string
-  scope: string
-  table: string
-  primary_key: string
-  payer: string
-  value: any
-}
-
 export type EosioShipRowDelta = any
 
 export type DeserializerMessageParams = {
@@ -97,20 +87,31 @@ export interface DeserializerResults {
 }
 
 // TODO: document this approach
-export interface EosioLightBlock {
+export interface EosioReaderLightBlock {
   chain_id: string
   block_num: number
   block_id: string
   previous_block_id?: string
   transactions?: any[] // light transactions
   actions?: any[] // whitelisted action data
-  table_rows?: any[]
+  table_rows?: EosioReaderLightTableRow[]
   abis?: any[] // eosio-ship-sends should handle abi updates.
 }
 
-export interface EosioTableRowsStreamData extends EosioShipTableRowData {
+export interface EosioReaderLightTableRow {
+  present: string
+  code: string
+  scope: string
+  table: string
+  primary_key: string
+  payer: string
+  value: any
+}
+
+export interface EosioReaderTableRowsStreamData extends EosioReaderLightTableRow {
   chain_id: string
-  transaction_id: string
+  block_num: number
+  block_id: string
 }
 
 // ==============================================================

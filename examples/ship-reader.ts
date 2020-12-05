@@ -1,5 +1,5 @@
 import { createEosioShipReader, EosioContractAbisMap, EosioShipReaderConfig, EosioShipTableRow } from '../src'
-import { eosioHost, fecthAbi, getInfo } from './utils'
+import { eosioHost, fecthAbi, getInfo, eosioApi } from './utils'
 
 const table_rows_whitelist: EosioShipTableRow[] = [
   { code: 'eosio.token', table: 'accounts' },
@@ -23,6 +23,7 @@ export const loadReader = async () => {
 
   const eosioShipReaderConfig: EosioShipReaderConfig = {
     ws_url: `ws://${eosioHost}:8080`,
+    rpc_url: eosioApi,
     ds_threads: 4,
     ds_experimental: false,
     delta_whitelist: [
