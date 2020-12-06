@@ -1,4 +1,4 @@
-import { createEosioShipReader, EosioContractAbisMap, EosioShipReaderConfig, EosioShipTableRow } from '../src'
+import { createEosioShipReader, EosioContractAbisMap, EosioReaderConfig, EosioShipTableRow } from '../src'
 import { eosioHost, fecthAbi, getInfo, eosioApi } from './utils'
 
 const table_rows_whitelist: EosioShipTableRow[] = [
@@ -21,7 +21,7 @@ export const loadReader = async () => {
   const contract_abis: EosioContractAbisMap = new Map()
   abisArr.forEach(({ account_name, abi }) => contract_abis.set(account_name, abi))
 
-  const eosioShipReaderConfig: EosioShipReaderConfig = {
+  const eosioReaderConfig: EosioReaderConfig = {
     ws_url: `ws://${eosioHost}:8080`,
     rpc_url: eosioApi,
     ds_threads: 4,
@@ -49,5 +49,5 @@ export const loadReader = async () => {
     auto_start: true,
   }
 
-  return await createEosioShipReader(eosioShipReaderConfig)
+  return await createEosioShipReader(eosioReaderConfig)
 }

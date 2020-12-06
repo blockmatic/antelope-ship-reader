@@ -3,7 +3,7 @@ import { StaticPool } from 'node-worker-threads-pool'
 import PQueue from 'p-queue'
 import WebSocket from 'ws'
 
-export type EosioShipReaderState = {
+export type EosioReaderState = {
   chain_id: string | null
   socket: WebSocket | null
   eosioAbi: RpcInterfaces.Abi | null
@@ -31,7 +31,7 @@ export interface EosioShipAction {
   action: string
 }
 
-export interface EosioShipReaderConfig {
+export interface EosioReaderConfig {
   ws_url: string
   rpc_url: string
   ds_threads: number
@@ -48,9 +48,9 @@ export type EosioContractAbisMap = Map<string, RpcInterfaces.Abi>
 
 export type EosioTypes = Map<string, Serialize.Type>
 
-export type EosioShipSocketMessage = string | Uint8Array
+export type EosioSocketMessage = string | Uint8Array
 
-export interface EosioShipReaderInfo {
+export interface EosioReaderInfo {
   message: string
   data?: any
 }
@@ -91,7 +91,6 @@ export interface EosioReaderLightBlock {
   chain_id: string
   block_num: number
   block_id: string
-  previous_block_id?: string
   transactions?: any[] // light transactions
   actions?: any[] // whitelisted action data
   table_rows?: EosioReaderLightTableRow[]
@@ -104,7 +103,6 @@ export interface EosioReaderLightTableRow {
   scope: string
   table: string
   primary_key: string
-  payer: string
   value: any
 }
 
@@ -172,7 +170,7 @@ export interface DeserializeParams {
   ds_experimental?: boolean
 }
 
-export type EosioShipBlock = {
+export type EosioReaderFullBlock = {
   head: { block_num: number; block_id: string }
   last_irreversible: { block_num: number; block_id: string }
   this_block: { block_num: number; block_id: string }
