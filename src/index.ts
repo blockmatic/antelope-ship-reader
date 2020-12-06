@@ -18,13 +18,16 @@ import {
   EosioReaderLightBlock,
   DeserializerResults,
   EosioReaderLightTableRow,
+  ShipTableDelta,
+  EosioReaderActionStreamData,
 } from './types'
 import { serialize } from './serializer'
 import { StaticPool } from 'node-worker-threads-pool'
 import { deserialize } from './deserializer'
 import * as nodeAbieos from '@eosrio/node-abieos'
-export * from './types'
 import fetch from 'node-fetch'
+
+export * from './types'
 
 const defaultShipRequest: EosioShipRequest = {
   start_block_num: 0,
@@ -71,7 +74,7 @@ export const createEosioShipReader = async (config: EosioReaderConfig) => {
   const fullBlocks$ = new Subject<EosioReaderFullBlock>()
   const deltas$ = new Subject<any>()
   const traces$ = new Subject<ShipTransactionTrace>()
-  const actions$ = new Subject<EosioAction>()
+  const actions$ = new Subject<EosioReaderActionStreamData>()
   const rows$ = new Subject<EosioReaderTableRowsStreamData>()
   const forks$ = new Subject<number>()
   const abis$ = new Subject<RpcInterfaces.Abi>()
@@ -274,7 +277,7 @@ export const createEosioShipReader = async (config: EosioReaderConfig) => {
   const deserializeMessage = async (message: EosioSocketMessage) => {
     if (!state.eosioTypes) throw new Error('missing types')
 
-    const [type, response] = deserialize({
+    const [type, deserializedShipMessage] = deserialize({
       code: 'eosio',
       type: 'result',
       data: message,
@@ -283,49 +286,63 @@ export const createEosioShipReader = async (config: EosioReaderConfig) => {
     })
 
     if (type !== 'get_blocks_result_v0') {
-      log$.next({ message: 'Not supported message received', data: { type, response } })
+      log$.next({ message: 'Not supported message received', data: { type, deserializedShipMessage } })
       return
     }
 
-    if (!response?.this_block) {
-      log$.next({ message: 'this_block is missing in eosio ship response' })
+    if (!deserializedShipMessage?.this_block) {
+      log$.next({ message: 'this_block is missing in eosio ship deserializedShipMessage' })
       return
     }
 
     // TODO: fix types
     // deserialize blocks, transaction traces and table deltas
-    let block: any = null
-    let traces: any = []
-    let deltas: any = []
-    // let lightTraces: any = []
+    let block: any
+    let traces: ShipTransactionTrace[] = []
+    let deltas: ShipTableDelta[] = []
+    const actions: EosioAction[] = []
     let lightTableRows: EosioReaderLightTableRow[]
-    const lightBlock: EosioReaderLightBlock = { chain_id: state.chain_id, ...response.this_block }
+    const lightBlock: EosioReaderLightBlock = { chain_id: state.chain_id, ...deserializedShipMessage.this_block }
 
     // TODO: review error handling
-    if (response.block) {
-      block = await deserializeParallel([{ code: 'eosio', type: 'signed_block', data: response.block }])
+    if (deserializedShipMessage.block) {
+      block = await deserializeParallel([{ code: 'eosio', type: 'signed_block', data: deserializedShipMessage.block }])
     } else if (state.shipRequest.fetch_block) {
-      log$.next({ message: `Block #${response.this_block.block_num} does not contain block data` })
+      log$.next({ message: `Block #${deserializedShipMessage.this_block.block_num} does not contain block data` })
     }
 
-    if (response.traces) {
-      traces = await deserializeParallel([{ code: 'eosio', type: 'transaction_trace[]', data: response.traces }])
+    if (deserializedShipMessage.traces) {
+      traces = (
+        await deserializeParallel([{ code: 'eosio', type: 'transaction_trace[]', data: deserializedShipMessage.traces }])
+      )[0]
+      traces.forEach(([_a, { id, action_traces }]) => {
+        action_traces.forEach(([_b, { act }]) => {
+          // TODO: check for whitelisted
+          actions.push(act)
+          actions$.next({
+            chain_id: state.chain_id!,
+            ...deserializedShipMessage.this_block,
+            transaction_id: id,
+            ...act,
+          })
+        })
+      })
     } else if (state.shipRequest.fetch_traces) {
-      log$.next({ message: `Block #${response.this_block.block_num} does not contain trace data` })
+      log$.next({ message: `Block #${deserializedShipMessage.this_block.block_num} does not contain trace data` })
     }
 
-    if (response.deltas) {
-      [deltas, lightTableRows] = await deserializeDeltas(response.deltas, response.this_block)
+    if (deserializedShipMessage.deltas) {
+      [deltas, lightTableRows] = await deserializeDeltas(deserializedShipMessage.deltas, deserializedShipMessage.this_block)
       lightBlock.table_rows = lightTableRows
     } else if (state.shipRequest.fetch_deltas) {
-      log$.next({ message: `Block #${response.this_block.block_num} does not contain delta data` })
+      log$.next({ message: `Block #${deserializedShipMessage.this_block.block_num} does not contain delta data` })
     }
 
     const blockData: EosioReaderFullBlock = {
-      this_block: response.this_block,
-      head: response.head,
-      last_irreversible: response.last_irreversible,
-      prev_block: response.prev_block,
+      this_block: deserializedShipMessage.this_block,
+      head: deserializedShipMessage.head,
+      last_irreversible: deserializedShipMessage.last_irreversible,
+      prev_block: deserializedShipMessage.prev_block,
       block,
       traces,
       deltas,

@@ -3,6 +3,8 @@ import { StaticPool } from 'node-worker-threads-pool'
 import PQueue from 'p-queue'
 import WebSocket from 'ws'
 
+// TODO: Perhaps it would be better to leverage existing types from https://github.com/EOSIO/eosjs/blob/master/src/eosjs-serialize.ts
+
 export type EosioReaderState = {
   chain_id: string | null
   socket: WebSocket | null
@@ -26,7 +28,7 @@ export interface EosioShipRequest {
   fetch_deltas?: boolean
 }
 
-export interface EosioShipAction {
+export interface EosioReaderActionFilter {
   code: string
   action: string
 }
@@ -38,26 +40,20 @@ export interface EosioReaderConfig {
   ds_experimental?: boolean
   request: EosioShipRequest
   delta_whitelist?: ShipTableDeltaName[]
-  table_rows_whitelist?: EosioShipTableRow[]
-  actions_whitelist?: EosioShipAction[]
-  contract_abis?: EosioContractAbisMap
+  table_rows_whitelist?: EosioReaderTableRowFilter[]
+  actions_whitelist?: EosioReaderActionFilter[]
+  contract_abis?: EosioReaderAbisMap
   auto_start?: boolean
 }
 
-export type EosioContractAbisMap = Map<string, RpcInterfaces.Abi>
-
-export type EosioTypes = Map<string, Serialize.Type>
-
-export type EosioSocketMessage = string | Uint8Array
+export type EosioReaderAbisMap = Map<string, RpcInterfaces.Abi>
 
 export interface EosioReaderInfo {
   message: string
   data?: any
 }
 
-export type ShipBlockData = any
-
-export interface EosioShipTableRow {
+export interface EosioReaderTableRowFilter {
   code: string
   scope?: string
   table: string
@@ -66,7 +62,9 @@ export interface EosioShipTableRow {
   upper_bound?: string
 }
 
-export type EosioShipRowDelta = any
+export type EosioTypes = Map<string, Serialize.Type>
+
+export type EosioSocketMessage = string | Uint8Array
 
 export type DeserializerMessageParams = {
   code: string
@@ -74,9 +72,17 @@ export type DeserializerMessageParams = {
   data: Uint8Array | string
 }
 
+export interface DeserializeParams {
+  code: string
+  type: string
+  data: Uint8Array | string
+  types: EosioTypes
+  ds_experimental?: boolean
+}
+
 export interface DeserializerWorkerData {
   abi: RpcInterfaces.Abi
-  contract_abis: EosioContractAbisMap
+  contract_abis: EosioReaderAbisMap
   ds_experimental: boolean
 }
 
@@ -103,7 +109,7 @@ export interface EosioReaderLightTableRow {
   scope: string
   table: string
   primary_key: string
-  value: any
+  value?: any
 }
 
 export interface EosioReaderTableRowsStreamData extends EosioReaderLightTableRow {
@@ -112,12 +118,21 @@ export interface EosioReaderTableRowsStreamData extends EosioReaderLightTableRow
   block_id: string
 }
 
-// ==============================================================
+export interface EosioReaderActionStreamData extends EosioAction {
+  chain_id: string
+  block_num: number
+  block_id: string
+  transaction_id: string
+}
 
-export declare type EosTable = {
-  code: string
-  scope: string
-  table: string
+export interface EosioReaderFullBlock {
+  head: { block_num: number; block_id: string }
+  last_irreversible: { block_num: number; block_id: string }
+  this_block: { block_num: number; block_id: string }
+  prev_block: { block_num: number; block_id: string }
+  block: ShipBlock
+  traces: ShipTransactionTrace[]
+  deltas: ShipTableDelta[]
 }
 
 export type EosioAction<T = { [key: string]: any } | string> = {
@@ -160,24 +175,6 @@ export interface BlockRequestType {
   fetch_block?: boolean
   fetch_traces?: boolean
   fetch_deltas?: boolean
-}
-
-export interface DeserializeParams {
-  code: string
-  type: string
-  data: Uint8Array | string
-  types: EosioTypes
-  ds_experimental?: boolean
-}
-
-export type EosioReaderFullBlock = {
-  head: { block_num: number; block_id: string }
-  last_irreversible: { block_num: number; block_id: string }
-  this_block: { block_num: number; block_id: string }
-  prev_block: { block_num: number; block_id: string }
-  block: ShipBlock
-  traces: ShipTransactionTrace[]
-  deltas: ShipTableDelta[]
 }
 
 export type ShipBlock = {

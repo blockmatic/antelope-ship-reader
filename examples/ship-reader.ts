@@ -1,7 +1,7 @@
-import { createEosioShipReader, EosioContractAbisMap, EosioReaderConfig, EosioShipTableRow } from '../src'
+import { createEosioShipReader, EosioReaderAbisMap, EosioReaderConfig, EosioReaderTableRowFilter } from '../src'
 import { eosioHost, fecthAbi, getInfo, eosioApi } from './utils'
 
-const table_rows_whitelist: EosioShipTableRow[] = [
+const table_rows_whitelist: EosioReaderTableRowFilter[] = [
   { code: 'eosio.token', table: 'accounts' },
   { code: 'bitcashtests', scope: 'bitcashtests', table: 'appstates' },
   { code: 'bitcashtests', scope: 'bitcashtests', table: 'exfees' },
@@ -18,7 +18,7 @@ export const loadReader = async () => {
   const uniqueContractNames = [...new Set(table_rows_whitelist?.map((row) => row.code))]
   const abisArr = await Promise.all(uniqueContractNames.map((account_name) => fecthAbi(account_name)))
 
-  const contract_abis: EosioContractAbisMap = new Map()
+  const contract_abis: EosioReaderAbisMap = new Map()
   abisArr.forEach(({ account_name, abi }) => contract_abis.set(account_name, abi))
 
   const eosioReaderConfig: EosioReaderConfig = {
