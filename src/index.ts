@@ -12,7 +12,6 @@ import {
   EosioReaderInfo,
   EosioReaderTableRowsStreamData,
   ShipTransactionTrace,
-  EosioAction,
   EosioReaderState,
   EosioReaderLightBlock,
   DeserializerResults,
@@ -21,6 +20,7 @@ import {
   EosioReaderActionStreamData,
   DeserializerParams,
   DeserializeActionsParams,
+  EosioReaderLightAction,
 } from './types'
 import { serialize } from './serializer'
 import { StaticPool } from 'node-worker-threads-pool'
@@ -235,17 +235,17 @@ export const createEosioShipReader = async (config: EosioReaderConfig) => {
         if (status !== 0) return undefined // failed transaction
 
         const whitelistedActionsDeserializerParams: DeserializerParams[] = []
-        const deserializedActions: EosioAction[] = []
+        const deserializedActions: EosioReaderLightAction[] = []
 
         // deserialize action data of all whitelisted actions
-        action_traces.forEach(([_b, { act }]) => {
+        action_traces.forEach(([_b, { act, receipt }]) => {
           const whitelistedAction = config.actions_whitelist?.find(
             ({ code, action }) => act.account === code && (act.name === action || act.name === '*'),
           )
 
           if (!whitelistedAction) return
 
-          deserializedActions.push(act)
+          deserializedActions.push({ transaction_id: id, global_sequence: receipt[1].global_sequence, ...act })
 
           whitelistedActionsDeserializerParams.push({
             code: act.account,
@@ -262,7 +262,6 @@ export const createEosioShipReader = async (config: EosioReaderConfig) => {
             chain_id: state.chain_id!,
             block_id,
             block_num,
-            transaction_id: id,
             ...deserializedActions[index],
           })
         })
@@ -271,7 +270,7 @@ export const createEosioShipReader = async (config: EosioReaderConfig) => {
       }),
     )
 
-    return allDeserializedActions.flat() as EosioAction[]
+    return allDeserializedActions.flat() as EosioReaderLightAction[]
   }
 
   const deserializeMessage = async (message: EosioSocketMessage) => {

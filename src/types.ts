@@ -107,10 +107,13 @@ export interface EosioReaderLightBlock {
   chain_id: string
   block_num: number
   block_id: string
-  transactions?: any[] // light transactions
-  actions?: any[] // whitelisted action data
-  table_rows?: EosioReaderLightTableRow[]
+  actions?: EosioReaderLightAction[] // whitelisted action data
+  table_rows?: EosioReaderLightTableRow[] // whitelisted table data
   abis?: any[] // eosio-ship-sends should handle abi updates.
+}
+
+export interface EosioReaderLightTransaction {
+  transaction_id: string
 }
 
 export interface EosioReaderLightTableRow {
@@ -128,11 +131,15 @@ export interface EosioReaderTableRowsStreamData extends EosioReaderLightTableRow
   block_id: string
 }
 
-export interface EosioReaderActionStreamData extends EosioAction {
+export interface EosioReaderLightAction extends EosioAction {
+  global_sequence: string
+  transaction_id: string
+}
+
+export interface EosioReaderActionStreamData extends EosioReaderLightAction {
   chain_id: string
   block_num: number
   block_id: string
-  transaction_id: string
 }
 
 export interface EosioReaderFullBlock {
@@ -145,7 +152,7 @@ export interface EosioReaderFullBlock {
   deltas: ShipTableDelta[]
 }
 
-export type EosioAction<T = { [key: string]: any } | string> = {
+export interface EosioAction<T = { [key: string]: any } | string> {
   account: string
   name: string
   authorization: Array<{ actor: string; permission: string }>
