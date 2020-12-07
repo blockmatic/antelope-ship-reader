@@ -1,4 +1,10 @@
-import { createEosioShipReader, EosioReaderAbisMap, EosioReaderConfig, EosioReaderTableRowFilter } from '../src'
+import {
+  createEosioShipReader,
+  EosioReaderAbisMap,
+  EosioReaderActionFilter,
+  EosioReaderConfig,
+  EosioReaderTableRowFilter,
+} from '../src'
 import { eosioHost, fecthAbi, getInfo, eosioApi } from './utils'
 
 const table_rows_whitelist: EosioReaderTableRowFilter[] = [
@@ -13,6 +19,8 @@ const table_rows_whitelist: EosioReaderTableRowFilter[] = [
   { code: 'bitcashtests', scope: 'bitcashtests', table: 'stat' },
 ]
 
+const actions_whitelist: EosioReaderActionFilter[] = [{ code: 'eosio.token', action: 'transfer' }]
+
 export const loadReader = async () => {
   const info = await getInfo()
   const uniqueContractNames = [...new Set(table_rows_whitelist?.map((row) => row.code))]
@@ -24,7 +32,7 @@ export const loadReader = async () => {
   const eosioReaderConfig: EosioReaderConfig = {
     ws_url: `ws://${eosioHost}:8080`,
     rpc_url: eosioApi,
-    ds_threads: 4,
+    ds_threads: 6,
     ds_experimental: false,
     delta_whitelist: [
       'account_metadata',
@@ -35,9 +43,10 @@ export const loadReader = async () => {
       'resource_limits_state',
     ],
     table_rows_whitelist,
+    actions_whitelist,
     contract_abis,
     request: {
-      start_block_num: info.head_block_num,
+      start_block_num: info.head_block_num + 10,
       end_block_num: 0xffffffff,
       max_messages_in_flight: 50,
       have_positions: [],

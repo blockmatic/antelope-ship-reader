@@ -8,9 +8,9 @@ import WebSocket from 'ws'
 export type EosioReaderState = {
   chain_id: string | null
   socket: WebSocket | null
-  eosioAbi: RpcInterfaces.Abi | null
   eosioTypes: EosioTypes | null
-  deserializationWorkers: StaticPool<DeserializerMessageParams[], any> | null
+  abis: EosioReaderAbisMap
+  deserializationWorkers: StaticPool<DeserializerParams | DeserializerParams[], any> | null
   unconfirmedMessages: number
   lastBlock: number
   blocksQueue: PQueue
@@ -57,7 +57,6 @@ export interface EosioReaderTableRowFilter {
   code: string
   scope?: string
   table: string
-  json?: boolean
   lower_bound?: string
   upper_bound?: string
 }
@@ -66,23 +65,28 @@ export type EosioTypes = Map<string, Serialize.Type>
 
 export type EosioSocketMessage = string | Uint8Array
 
-export type DeserializerMessageParams = {
+export interface DeserializeAbieosParams {
   code: string
   type: string
   data: Uint8Array | string
 }
 
-export interface DeserializeParams {
-  code: string
+export interface DeserializeEosjsParams {
   type: string
   data: Uint8Array | string
   types: EosioTypes
-  ds_experimental?: boolean
+}
+
+export interface DeserializerParams {
+  code: string
+  type?: string
+  table?: string
+  action?: string
+  data: Uint8Array | string
 }
 
 export interface DeserializerWorkerData {
-  abi: RpcInterfaces.Abi
-  contract_abis: EosioReaderAbisMap
+  abis: EosioReaderAbisMap
   ds_experimental: boolean
 }
 
@@ -90,6 +94,12 @@ export interface DeserializerResults {
   success: boolean
   message?: string
   data?: any
+}
+
+export interface DeserializeActionsParams {
+  traces: ShipTransactionTrace[]
+  block_id: string
+  block_num: number
 }
 
 // TODO: document this approach

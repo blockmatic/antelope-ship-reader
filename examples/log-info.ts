@@ -1,4 +1,3 @@
-import { EosioShipReaderInfo } from '../src'
 import { loadReader } from './ship-reader'
 import { getInfo } from './utils'
 
@@ -10,11 +9,11 @@ const run = async () => {
     info = await getInfo()
   }, 250)
 
-  blocks$.subscribe(({ traces }) => {
-    console.log(traces)
-  })
+  blocks$.subscribe(({ actions, table_rows, block_id }) =>
+    console.log(`${JSON.stringify({ block_id, actions: actions?.length, table_rows: table_rows?.length })} \n`),
+  )
 
-  log$.subscribe((logInfo: EosioShipReaderInfo) => console.log(logInfo.message, `nodeos head_block_num ${info.head_block_num}`))
+  log$.subscribe(({ message }) => console.log(message, `nodeos head_block_num ${info.head_block_num}`))
 
   close$.subscribe(() => console.log('connection closed'))
 }

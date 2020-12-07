@@ -2,18 +2,15 @@ import { parentPort, workerData } from 'worker_threads'
 import { TextDecoder, TextEncoder } from 'text-encoding'
 import * as nodeAbieos from '@eosrio/node-abieos'
 import { Serialize } from 'eosjs'
-import { DeserializeParams, DeserializerMessageParams, DeserializerWorkerData, EosioTypes } from './types'
+import { DeserializeAbieosParams, DeserializeEosjsParams, DeserializerParams, DeserializerWorkerData, EosioTypes } from './types'
 
-export function deserialize({ code, type, data, types, ds_experimental }: DeserializeParams) {
-  if (ds_experimental) {
-    const result =
-      typeof data === 'string'
-        ? nodeAbieos.hex_to_json(code, type, data)
-        : nodeAbieos.bin_to_json('eosio', type, Buffer.from(data))
+// NOTE: you need use function instead of arrow here in the deserializer, see Nodejs worker_threads documentation
 
-    return result as any
-  }
+export function deserializeAbieos({ code, data, type }: DeserializeAbieosParams) {
+  return data === 'string' ? nodeAbieos.hex_to_json(code, type, data) : nodeAbieos.bin_to_json(code, type, Buffer.from(data))
+}
 
+export function deserializeEosjs({ type, data, types }: DeserializeEosjsParams) {
   const dataArray = typeof data === 'string' ? Uint8Array.from(Buffer.from(data, 'hex')) : data
   const buffer = new Serialize.SerialBuffer({ textEncoder: new TextEncoder(), textDecoder: new TextDecoder(), array: dataArray })
   const result = Serialize.getType(types, type).deserialize(buffer, new Serialize.SerializerState({ bytesAsUint8Array: true }))
@@ -23,31 +20,45 @@ export function deserialize({ code, type, data, types, ds_experimental }: Deseri
   return result
 }
 
+function processDeserializationRequest({ code, data, type, table, action }: DeserializerParams) {
+  if (!data) return parentPort!.postMessage({ success: false, message: 'Empty data received on deserialize worker' })
+  const args: DeserializerWorkerData = workerData
+  // get the correct abi and types for table deserialization
+  const deserializationAbi = args.abis.get(code)
+  if (!deserializationAbi) return parentPort!.postMessage({ success: false, message: 'Deserialization ABI not found' })
+
+  let deserializationType = type
+  if (table) {
+    deserializationType = deserializationAbi.tables.find(({ name }) => name === table)?.type
+  } else if (action) {
+    deserializationType = deserializationAbi.actions.find(({ name }) => name === action)?.type
+  }
+
+  if (!deserializationType) return parentPort!.postMessage({ success: false, message: 'Deserialization type not found' })
+
+  let result
+  if (args.ds_experimental) {
+    result = deserializeAbieos({ code, type: deserializationType, data })
+  } else {
+    const deserializationTypes = Serialize.getTypesFromAbi(Serialize.createInitialTypes(), deserializationAbi) as EosioTypes
+    if (!deserializationTypes) return parentPort!.postMessage({ success: false, message: 'Deserialization types not found' })
+    result = deserializeEosjs({ type: deserializationType, data, types: deserializationTypes })
+  }
+  return result
+}
+
 // deserialization workers
 if (parentPort) {
-  const args: DeserializerWorkerData = workerData
-
-  const types = Serialize.getTypesFromAbi(Serialize.createInitialTypes(), args.abi) as EosioTypes
-
   // You can do any heavy stuff here, in a synchronous way without blocking the "main thread"
-  parentPort.on('message', (param: DeserializerMessageParams[]) => {
+  parentPort.on('message', (params: DeserializerParams | DeserializerParams[]) => {
     try {
-      const result = <any>[]
-
-      for (const row of param) {
-        if (row.data === null) {
-          return parentPort!.postMessage({ success: false, message: 'Empty data received on deserialize worker' })
-        }
-
-        result.push(deserialize({ code: row.code, type: row.type, data: row.data, types, ds_experimental: args.ds_experimental }))
+      let result: any[] | any
+      if (Array.isArray(params)) {
+        result = []
+        params.forEach((param) => result.push(processDeserializationRequest(param)))
+      } else {
+        result = processDeserializationRequest(params)
       }
-
-      // console.log('------------ SUCCESS ---------------')
-      // result.forEach( (element:any) => {
-      //   console.log(element)
-      // });
-      // console.log('------------------------------------')
-
       return parentPort!.postMessage({ success: true, data: result })
     } catch (e) {
       console.log('error', e)
