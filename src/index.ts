@@ -240,7 +240,7 @@ export const createEosioShipReader = async (config: EosioReaderConfig) => {
         // deserialize action data of all whitelisted actions
         action_traces.forEach(([_b, { act, receipt }]) => {
           const whitelistedAction = config.actions_whitelist?.find(
-            ({ code, action }) => act.account === code && (act.name === action || act.name === '*'),
+            ({ code, action }) => act.account === code && (action === '*' || act.name === action),
           )
 
           if (!whitelistedAction) return
