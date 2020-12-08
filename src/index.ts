@@ -154,8 +154,6 @@ export const createEosioShipReader = async (config: EosioReaderConfig) => {
       data: deserializedRowData[1].value,
     })
 
-    rows$.next({ ...block, present: row.present, ...deserializedRowData[1] })
-
     return [{ ...row, data: deserializedRowData }, Boolean(tableWhitelisted)]
   }
 
@@ -189,8 +187,10 @@ export const createEosioShipReader = async (config: EosioReaderConfig) => {
                 // return if it's not a contract row delta
                 if (deserializedRowData[0] !== 'contract_row_v0') return { ...row, data: deserializedRowData }
 
+                // TODO: send array to deserializer, not one by one.
                 const [tableRow, whitelisted] = await deserializeTableRow({ block, row, deserializedRowData })
 
+                // TODO: this push might be better inside deserializeTableRow
                 if (whitelisted) {
                   const rowDataClone = { ...tableRow.data[1] }
                   delete rowDataClone.payer
