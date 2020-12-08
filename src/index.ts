@@ -270,7 +270,7 @@ export const createEosioShipReader = async (config: EosioReaderConfig) => {
       }),
     )
 
-    return allDeserializedActions.flat() as EosioReaderLightAction[]
+    return allDeserializedActions.flat().filter((x) => x !== undefined) as EosioReaderLightAction[]
   }
 
   const deserializeMessage = async (message: EosioSocketMessage) => {
