@@ -39,10 +39,10 @@ export interface EosioReaderConfig {
   ds_threads: number
   ds_experimental?: boolean
   request: EosioShipRequest
-  delta_whitelist?: ShipTableDeltaName[]
-  table_rows_whitelist?: EosioReaderTableRowFilter[]
-  actions_whitelist?: EosioReaderActionFilter[]
-  contract_abis?: EosioReaderAbisMap
+  delta_whitelist: () => ShipTableDeltaName[]
+  table_rows_whitelist: () => EosioReaderTableRowFilter[]
+  actions_whitelist: () => EosioReaderActionFilter[]
+  contract_abis: () => EosioReaderAbisMap
   auto_start?: boolean
 }
 

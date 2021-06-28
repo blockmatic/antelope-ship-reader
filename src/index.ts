@@ -43,8 +43,8 @@ const defaultShipRequest: EosioShipRequest = {
 
 export const createEosioShipReader = async (config: EosioReaderConfig) => {
   // ========================= eosio-ship-reader factory validations ===================================
-  const contractNames = [...new Set(config.table_rows_whitelist?.map((row) => row.code))]
-  const missingAbis = contractNames.filter((name) => !config.contract_abis?.get(name))
+  const contractNames = [...new Set(config.table_rows_whitelist().map((row) => row.code))]
+  const missingAbis = contractNames.filter((name) => !config.contract_abis().get(name))
 
   if (missingAbis.length > 0) {
     throw new Error(`Missing abis for the following contracts ${missingAbis.toString()} in eosio-ship-reader `)
@@ -58,7 +58,7 @@ export const createEosioShipReader = async (config: EosioReaderConfig) => {
     chain_id: null,
     socket: null,
     eosioTypes: null,
-    abis: new Map<string, RpcInterfaces.Abi>(config.contract_abis || []),
+    abis: new Map<string, RpcInterfaces.Abi>(config.contract_abis()),
     deserializationWorkers: null,
     unconfirmedMessages: 0,
     lastBlock: 0,
@@ -136,7 +136,7 @@ export const createEosioShipReader = async (config: EosioReaderConfig) => {
   // TODO: types
   const deserializeTableRow = async ({ block, row, deserializedRowData }: any) => {
     // check if the table is whitelisted
-    const tableWhitelisted = config.table_rows_whitelist?.find((tableRow) => {
+    const tableWhitelisted = config.table_rows_whitelist().find((tableRow) => {
       return (
         tableRow.code === deserializedRowData[1].code &&
         (!tableRow.scope || tableRow.scope === deserializedRowData[1].scope) &&
@@ -166,7 +166,7 @@ export const createEosioShipReader = async (config: EosioReaderConfig) => {
         const lightTableRows: EosioReaderLightTableRow[] = []
 
         // only process whitelisted deltas, return if not in delta_whitelist
-        if (config.delta_whitelist?.indexOf(delta[1].name) === -1) return [delta, lightTableRows]
+        if (config.delta_whitelist().indexOf(delta[1].name) === -1) return [delta, lightTableRows]
 
         const deserializerParams: DeserializerParams[] = delta[1].rows.map((row: any) => ({
           type: delta[1].name,
@@ -239,9 +239,9 @@ export const createEosioShipReader = async (config: EosioReaderConfig) => {
 
         // deserialize action data of all whitelisted actions
         action_traces.forEach(([_b, { act, receipt }]) => {
-          const whitelistedAction = config.actions_whitelist?.find(
-            ({ code, action }) => act.account === code && (action === '*' || act.name === action),
-          )
+          const whitelistedAction = config
+            .actions_whitelist()
+            .find(({ code, action }) => act.account === code && (action === '*' || act.name === action))
 
           if (!whitelistedAction) return
 
