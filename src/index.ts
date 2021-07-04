@@ -38,7 +38,7 @@ const defaultShipRequest: EosioShipRequest = {
   fetch_block: true,
   fetch_traces: true,
   fetch_deltas: true,
-  fetch_block_header: true
+  fetch_block_header: true,
 }
 
 export const createEosioShipReader = async (config: EosioReaderConfig) => {
@@ -46,7 +46,8 @@ export const createEosioShipReader = async (config: EosioReaderConfig) => {
   const contractNames = [...new Set(config.table_rows_whitelist().map((row) => row.code))]
   const missingAbis = contractNames.filter((name) => !config.contract_abis().get(name))
 
-  if (missingAbis.length > 0) throw new Error(`Missing abis for the following contracts ${missingAbis.toString()} in eosio-ship-reader `)
+  if (missingAbis.length > 0)
+    throw new Error(`Missing abis for the following contracts ${missingAbis.toString()} in eosio-ship-reader `)
 
   if (config.ds_experimental && !nodeAbieos) throw new Error('Only Linux is supported by abieos')
 
@@ -308,7 +309,7 @@ export const createEosioShipReader = async (config: EosioReaderConfig) => {
     }
 
     if (deserializedShipMessage.deltas) {
-      [deltas, lightTableRows] = await deserializeDeltas(deserializedShipMessage.deltas, deserializedShipMessage.this_block)
+      ;[deltas, lightTableRows] = await deserializeDeltas(deserializedShipMessage.deltas, deserializedShipMessage.this_block)
       lightBlock.table_rows = lightTableRows
     } else if (state.shipRequest.fetch_deltas) {
       log$.next({ message: `Block #${deserializedShipMessage.this_block.block_num} does not contain delta data` })

@@ -1747,7 +1747,7 @@
       ]
     }
   ],
-  "types": [s
+  "types": [
     {
       "new_type_name": "transaction_id",
       "type": "checksum256"
