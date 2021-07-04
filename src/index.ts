@@ -26,7 +26,6 @@ import { serialize } from './serializer'
 import { StaticPool } from 'node-worker-threads-pool'
 import * as nodeAbieos from '@eosrio/node-abieos'
 import fetch from 'node-fetch'
-// import fs from 'fs'
 
 export * from './types'
 
@@ -39,6 +38,7 @@ const defaultShipRequest: EosioShipRequest = {
   fetch_block: true,
   fetch_traces: true,
   fetch_deltas: true,
+  fetch_block_header: true
 }
 
 export const createEosioShipReader = async (config: EosioReaderConfig) => {
@@ -46,11 +46,8 @@ export const createEosioShipReader = async (config: EosioReaderConfig) => {
   const contractNames = [...new Set(config.table_rows_whitelist().map((row) => row.code))]
   const missingAbis = contractNames.filter((name) => !config.contract_abis().get(name))
 
-  if (missingAbis.length > 0) {
-    throw new Error(`Missing abis for the following contracts ${missingAbis.toString()} in eosio-ship-reader `)
-  }
+  if (missingAbis.length > 0) throw new Error(`Missing abis for the following contracts ${missingAbis.toString()} in eosio-ship-reader `)
 
-  // TODO: get missing abis from nodeos rpc ?
   if (config.ds_experimental && !nodeAbieos) throw new Error('Only Linux is supported by abieos')
 
   // ========================= eosio-ship-reader state ===================================
@@ -66,7 +63,6 @@ export const createEosioShipReader = async (config: EosioReaderConfig) => {
     shipRequest: { ...defaultShipRequest, ...config.request },
   }
 
-  // get chain_id
   try {
     const info = await fetch(`${config.rpc_url}/v1/chain/get_info`).then((res: any) => res.json())
     state.chain_id = info.chain_id
@@ -133,8 +129,7 @@ export const createEosioShipReader = async (config: EosioReaderConfig) => {
     return result.data
   }
 
-  // TODO: types
-  const deserializeTableRow = async ({ block, row, deserializedRowData }: any) => {
+  const deserializeTableRow = async ({ _block, row, deserializedRowData }: any) => {
     // check if the table is whitelisted
     const tableWhitelisted = config.table_rows_whitelist().find((tableRow) => {
       return (
@@ -162,7 +157,7 @@ export const createEosioShipReader = async (config: EosioReaderConfig) => {
 
     const processed: Array<[any, Array<EosioReaderLightTableRow>]> = await Promise.all(
       deltas.map(async (delta: any) => {
-        if (delta[0] !== 'table_delta_v0') throw Error(`Unsupported table delta type received ${delta[0]}`)
+        if (delta[0] !== 'table_delta_v1') throw Error(`Unsupported table delta type received ${delta[0]}`)
         const lightTableRows: EosioReaderLightTableRow[] = []
 
         // only process whitelisted deltas, return if not in delta_whitelist
@@ -185,7 +180,7 @@ export const createEosioShipReader = async (config: EosioReaderConfig) => {
                 const deserializedRowData = deserializedDelta[index]
 
                 // return if it's not a contract row delta
-                if (deserializedRowData[0] !== 'contract_row_v0') return { ...row, data: deserializedRowData }
+                if (deserializedRowData[0] !== 'contract_row_v1') return { ...row, data: deserializedRowData }
 
                 // TODO: send array to deserializer, not one by one.
                 const [tableRow, whitelisted] = await deserializeTableRow({ block, row, deserializedRowData })
@@ -280,7 +275,8 @@ export const createEosioShipReader = async (config: EosioReaderConfig) => {
       data: message,
     })
 
-    if (type !== 'get_blocks_result_v0') {
+    // TODO: double check
+    if (type === 'get_blocks_result_v0') {
       log$.next({ message: 'Not supported message received', data: { type, deserializedShipMessage } })
       return
     }
@@ -290,7 +286,6 @@ export const createEosioShipReader = async (config: EosioReaderConfig) => {
       return
     }
 
-    // TODO: fix types
     // deserialize blocks, transaction traces and table deltas
     let block: any
     let traces: ShipTransactionTrace[] = []
@@ -300,7 +295,7 @@ export const createEosioShipReader = async (config: EosioReaderConfig) => {
 
     // TODO: review error handling
     if (deserializedShipMessage.block) {
-      block = await deserializeParallel({ code: 'eosio', type: 'signed_block', data: deserializedShipMessage.block })
+      block = await deserializeParallel({ code: 'eosio', type: 'signed_block_variant', data: deserializedShipMessage.block })
     } else if (state.shipRequest.fetch_block) {
       log$.next({ message: `Block #${deserializedShipMessage.this_block.block_num} does not contain block data` })
     }
@@ -372,7 +367,7 @@ export const createEosioShipReader = async (config: EosioReaderConfig) => {
       },
     })
 
-    const serializedRequest = serialize('request', ['get_blocks_request_v0', state.shipRequest], state.eosioTypes)
+    const serializedRequest = serialize('request', ['get_blocks_request_v1', state.shipRequest], state.eosioTypes)
     state.socket!.send(serializedRequest)
   })
 

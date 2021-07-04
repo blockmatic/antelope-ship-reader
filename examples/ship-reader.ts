@@ -32,6 +32,7 @@ export const loadReader = async () => {
     abisArr.forEach(({ account_name, abi }) => numap.set(account_name, abi))
     return numap
   }
+
   const delta_whitelist: () => ShipTableDeltaName[] = () => [
     'account_metadata',
     'contract_table',
@@ -59,6 +60,7 @@ export const loadReader = async () => {
       fetch_block: true,
       fetch_traces: true,
       fetch_deltas: true,
+      fetch_block_header: true
     },
     auto_start: true,
   }

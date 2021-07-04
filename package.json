@@ -1,6 +1,6 @@
 {
   "name": "@blockmatic/eosio-ship-reader",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Reactive multi-threaded EOSIO state reader for NodeJS",
   "repository": "git@github.com:blockmatic/eosio-ship-reader.git",
   "author": "blockmatic.io",
@@ -36,31 +36,34 @@
     }
   },
   "devDependencies": {
-    "@blockmatic/eslint-config": "^1.3.12",
-    "@blockmatic/prettier-config": "^1.3.3",
-    "@blockmatic/tsconfig": "^1.8.4",
-    "@types/node": "^14.14.8",
-    "@types/text-encoding": "^0.0.35",
-    "@types/ws": "^7.4.0",
-    "all-contributors-cli": "^6.19.0",
-    "eslint": "6",
-    "husky": "^4.3.0",
-    "lint-staged": "^10.5.1",
-    "prettier": "^2.1.2",
+    "@blockmatic/eslint-config": "^2.0.0",
+    "@blockmatic/prettier-config": "^2.0.0",
+    "@blockmatic/tsconfig": "^2.0.0",
+    "@types/node": "^16.0.0",
+    "@types/text-encoding": "^0.0.36",
+    "@types/ws": "^7.4.6",
+    "all-contributors-cli": "^6.20.0",
+    "eslint": "7",
+    "husky": "^7.0.0",
+    "lint-staged": "^11.0.0",
+    "prettier": "^2.3.2",
     "rimraf": "^3.0.2",
-    "ts-node-dev": "^1.0.0",
-    "typescript": "^3.7"
+    "ts-node-dev": "^1.1.8",
+    "typescript": "^4.3"
   },
   "dependencies": {
-    "@eosrio/node-abieos": "^2.1.0-beta.0",
-    "@types/node-fetch": "^2.5.7",
-    "eosjs": "^21.0.3",
+    "@eosrio/node-abieos": "^2.1.1",
+    "@types/node-fetch": "^2.5.10",
+    "eosjs": "^22.0.0",
     "node-fetch": "^2.6.1",
-    "node-worker-threads-pool": "^1.4.3",
-    "p-queue": "^6.6.2",
+    "node-worker-threads-pool": "1.4.3",
+    "p-queue": "6.6.2",
     "rxjs": "^6.6.3",
     "text-encoding": "^0.7.0",
     "winston": "^3.3.3",
-    "ws": "^7.4.0"
+    "ws": "^7.5.1"
+  },
+  "peerDependencies": {
+    "rxjs": "^6.6.3"
   }
 }

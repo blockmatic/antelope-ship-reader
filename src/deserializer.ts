@@ -5,8 +5,8 @@ import { Serialize } from 'eosjs'
 import { DeserializeAbieosParams, DeserializeEosjsParams, DeserializerParams, DeserializerWorkerData, EosioTypes } from './types'
 
 // NOTE: you need use function instead of arrow here in the deserializer, see Nodejs worker_threads documentation
-
 export function deserializeAbieos({ code, data, type }: DeserializeAbieosParams) {
+  console.log({ code, data, type })
   return data === 'string' ? nodeAbieos.hex_to_json(code, type, data) : nodeAbieos.bin_to_json(code, type, Buffer.from(data))
 }
 
