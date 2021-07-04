@@ -159,6 +159,7 @@ export const createEosioShipReader = async (config: EosioReaderConfig) => {
   const deserializeDeltas = async (data: Uint8Array, block: any): Promise<any> => {
     const deltas = await deserializeParallel({ code: 'eosio', type: 'table_delta[]', data })
 
+
     const processed: Array<[any, Array<EosioReaderLightTableRow>]> = await Promise.all(
       deltas.map(async (delta: any) => {
         if (delta[0] !== 'table_delta_v1') throw Error(`Unsupported table delta type received ${delta[0]}`)
@@ -184,7 +185,7 @@ export const createEosioShipReader = async (config: EosioReaderConfig) => {
                 const deserializedRowData = deserializedDelta[index]
 
                 // return if it's not a contract row delta
-                if (deserializedRowData[0] !== 'contract_row_v1') return { ...row, data: deserializedRowData }
+                if (deserializedRowData[0] !== 'contract_row_v0') return { ...row, data: deserializedRowData }
 
                 // TODO: send array to deserializer, not one by one.
                 const [tableRow, whitelisted] = await deserializeTableRow({ block, row, deserializedRowData })

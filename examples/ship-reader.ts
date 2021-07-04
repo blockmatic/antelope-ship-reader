@@ -20,7 +20,7 @@ const table_rows_whitelist: () => EosioReaderTableRowFilter[] = () => [
   { code: 'bitcashtests', scope: 'bitcashtests', table: 'stat' },
 ]
 
-const actions_whitelist: () => EosioReaderActionFilter[] = () => [{ code: 'bitcashtests', action: '*' }]
+const actions_whitelist: () => EosioReaderActionFilter[] = () => [{ code: 'bitcashtests', action: '*' },{ code: 'eosio.token', action: '*' }]
 
 export const loadReader = async () => {
   const info = await getInfo()
