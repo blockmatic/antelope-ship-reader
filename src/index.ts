@@ -28,6 +28,7 @@ import * as nodeAbieos from '@eosrio/node-abieos'
 import fetch from 'node-fetch'
 
 export * from './types'
+export * from 'rxjs'
 
 const defaultShipRequest: EosioShipRequest = {
   start_block_num: 0,
@@ -72,6 +73,8 @@ export const createEosioShipReader = async (config: EosioReaderConfig) => {
   }
 
   // create rxjs subjects
+  // export type BlocksSubject = Subject<EosioReaderLightBlock>
+
   const messages$ = new Subject<string>()
   const errors$ = new Subject<ErrorEvent>()
   const close$ = new Subject<CloseEvent>()

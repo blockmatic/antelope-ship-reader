@@ -1756,351 +1756,212 @@
   "variants": [
     {
       "name": "request",
-      "types": [
-        "get_status_request_v0",
-        "get_blocks_request_v0",
-        "get_blocks_ack_request_v0",
-        "get_blocks_request_v1"
-      ]
+      "types": ["get_status_request_v0", "get_blocks_request_v0", "get_blocks_ack_request_v0", "get_blocks_request_v1"]
     },
     {
       "name": "result",
-      "types": [
-        "get_status_result_v0",
-        "get_blocks_result_v0",
-        "get_blocks_result_v1",
-        "get_blocks_result_v2"
-      ]
+      "types": ["get_status_result_v0", "get_blocks_result_v0", "get_blocks_result_v1", "get_blocks_result_v2"]
     },
     {
       "name": "action_receipt",
-      "types": [
-        "action_receipt_v0"
-      ]
+      "types": ["action_receipt_v0"]
     },
     {
       "name": "action_trace",
-      "types": [
-        "action_trace_v0",
-        "action_trace_v1"
-      ]
+      "types": ["action_trace_v0", "action_trace_v1"]
     },
     {
       "name": "partial_transaction",
-      "types": [
-        "partial_transaction_v0",
-        "partial_transaction_v1"
-      ]
+      "types": ["partial_transaction_v0", "partial_transaction_v1"]
     },
     {
       "name": "transaction_trace",
-      "types": [
-        "transaction_trace_v0"
-      ]
+      "types": ["transaction_trace_v0"]
     },
     {
       "name": "transaction_variant",
-      "types": [
-        "checksum256",
-        "packed_transaction"
-      ]
+      "types": ["checksum256", "packed_transaction"]
     },
     {
       "name": "transaction_variant_v0",
-      "types": [
-        "transaction_id",
-        "packed_transaction_v0"
-      ]
+      "types": ["transaction_id", "packed_transaction_v0"]
     },
     {
       "name": "signed_block_variant",
-      "types": [
-        "signed_block_v0",
-        "signed_block_v1"
-      ]
+      "types": ["signed_block_v0", "signed_block_v1"]
     },
     {
       "name": "segment_type",
-      "types": [
-        "checksum256",
-        "bytes"
-      ]
+      "types": ["checksum256", "bytes"]
     },
     {
       "name": "prunable_data_t",
-      "types": [
-        "prunable_data_full_legacy",
-        "prunable_data_none",
-        "prunable_data_partial",
-        "prunable_data_full"
-      ]
+      "types": ["prunable_data_full_legacy", "prunable_data_none", "prunable_data_partial", "prunable_data_full"]
     },
     {
       "name": "table_delta",
-      "types": [
-        "table_delta_v0",
-        "table_delta_v1"
-      ]
+      "types": ["table_delta_v0", "table_delta_v1"]
     },
     {
       "name": "account",
-      "types": [
-        "account_v0"
-      ]
+      "types": ["account_v0"]
     },
     {
       "name": "account_metadata",
-      "types": [
-        "account_metadata_v0"
-      ]
+      "types": ["account_metadata_v0"]
     },
     {
       "name": "code",
-      "types": [
-        "code_v0"
-      ]
+      "types": ["code_v0"]
     },
     {
       "name": "contract_table",
-      "types": [
-        "contract_table_v0"
-      ]
+      "types": ["contract_table_v0"]
     },
     {
       "name": "contract_row",
-      "types": [
-        "contract_row_v0"
-      ]
+      "types": ["contract_row_v0"]
     },
     {
       "name": "contract_index64",
-      "types": [
-        "contract_index64_v0"
-      ]
+      "types": ["contract_index64_v0"]
     },
     {
       "name": "contract_index128",
-      "types": [
-        "contract_index128_v0"
-      ]
+      "types": ["contract_index128_v0"]
     },
     {
       "name": "contract_index256",
-      "types": [
-        "contract_index256_v0"
-      ]
+      "types": ["contract_index256_v0"]
     },
     {
       "name": "contract_index_double",
-      "types": [
-        "contract_index_double_v0"
-      ]
+      "types": ["contract_index_double_v0"]
     },
     {
       "name": "contract_index_long_double",
-      "types": [
-        "contract_index_long_double_v0"
-      ]
+      "types": ["contract_index_long_double_v0"]
     },
     {
       "name": "key_value",
-      "types": [
-        "key_value_v0"
-      ]
+      "types": ["key_value_v0"]
     },
     {
       "name": "chain_config",
-      "types": [
-        "chain_config_v0",
-        "chain_config_v1"
-      ]
+      "types": ["chain_config_v0", "chain_config_v1"]
     },
     {
       "name": "global_property",
-      "types": [
-        "global_property_v0",
-        "global_property_v1"
-      ]
+      "types": ["global_property_v0", "global_property_v1"]
     },
     {
       "name": "generated_transaction",
-      "types": [
-        "generated_transaction_v0"
-      ]
+      "types": ["generated_transaction_v0"]
     },
     {
       "name": "activated_protocol_feature",
-      "types": [
-        "activated_protocol_feature_v0"
-      ]
+      "types": ["activated_protocol_feature_v0"]
     },
     {
       "name": "protocol_state",
-      "types": [
-        "protocol_state_v0"
-      ]
+      "types": ["protocol_state_v0"]
     },
     {
       "name": "permission",
-      "types": [
-        "permission_v0"
-      ]
+      "types": ["permission_v0"]
     },
     {
       "name": "permission_link",
-      "types": [
-        "permission_link_v0"
-      ]
+      "types": ["permission_link_v0"]
     },
     {
       "name": "resource_limits",
-      "types": [
-        "resource_limits_v0"
-      ]
+      "types": ["resource_limits_v0"]
     },
     {
       "name": "usage_accumulator",
-      "types": [
-        "usage_accumulator_v0"
-      ]
+      "types": ["usage_accumulator_v0"]
     },
     {
       "name": "resource_usage",
-      "types": [
-        "resource_usage_v0"
-      ]
+      "types": ["resource_usage_v0"]
     },
     {
       "name": "resource_limits_state",
-      "types": [
-        "resource_limits_state_v0"
-      ]
+      "types": ["resource_limits_state_v0"]
     },
     {
       "name": "resource_limits_ratio",
-      "types": [
-        "resource_limits_ratio_v0"
-      ]
+      "types": ["resource_limits_ratio_v0"]
     },
     {
       "name": "elastic_limit_parameters",
-      "types": [
-        "elastic_limit_parameters_v0"
-      ]
+      "types": ["elastic_limit_parameters_v0"]
     },
     {
       "name": "resource_limits_config",
-      "types": [
-        "resource_limits_config_v0"
-      ]
+      "types": ["resource_limits_config_v0"]
     },
     {
       "name": "block_signing_authority",
-      "types": [
-        "block_signing_authority_v0"
-      ]
+      "types": ["block_signing_authority_v0"]
     }
   ],
   "tables": [
     {
       "name": "account",
       "type": "account",
-      "key_names": [
-        "name"
-      ]
+      "key_names": ["name"]
     },
     {
       "name": "actmetadata",
       "type": "account_metadata",
-      "key_names": [
-        "name"
-      ]
+      "key_names": ["name"]
     },
     {
       "name": "code",
       "type": "code",
-      "key_names": [
-        "vm_type",
-        "vm_version",
-        "code_hash"
-      ]
+      "key_names": ["vm_type", "vm_version", "code_hash"]
     },
     {
       "name": "contracttbl",
       "type": "contract_table",
-      "key_names": [
-        "code",
-        "scope",
-        "table"
-      ]
+      "key_names": ["code", "scope", "table"]
     },
     {
       "name": "contractrow",
       "type": "contract_row",
-      "key_names": [
-        "code",
-        "scope",
-        "table",
-        "primary_key"
-      ]
+      "key_names": ["code", "scope", "table", "primary_key"]
     },
     {
       "name": "cntrctidx1",
       "type": "contract_index64",
-      "key_names": [
-        "code",
-        "scope",
-        "table",
-        "primary_key"
-      ]
+      "key_names": ["code", "scope", "table", "primary_key"]
     },
     {
       "name": "cntrctidx2",
       "type": "contract_index128",
-      "key_names": [
-        "code",
-        "scope",
-        "table",
-        "primary_key"
-      ]
+      "key_names": ["code", "scope", "table", "primary_key"]
     },
     {
       "name": "cntrctidx3",
       "type": "contract_index256",
-      "key_names": [
-        "code",
-        "scope",
-        "table",
-        "primary_key"
-      ]
+      "key_names": ["code", "scope", "table", "primary_key"]
     },
     {
       "name": "cntrctidx4",
       "type": "contract_index_double",
-      "key_names": [
-        "code",
-        "scope",
-        "table",
-        "primary_key"
-      ]
+      "key_names": ["code", "scope", "table", "primary_key"]
     },
     {
       "name": "cntrctidx5",
       "type": "contract_index_long_double",
-      "key_names": [
-        "code",
-        "scope",
-        "table",
-        "primary_key"
-      ]
+      "key_names": ["code", "scope", "table", "primary_key"]
     },
     {
       "name": "keyvalue",
       "type": "key_value",
-      "key_names": [
-        "contract",
-        "key"
-      ]
+      "key_names": ["contract", "key"]
     },
     {
       "name": "global.pty",
@@ -2110,10 +1971,7 @@
     {
       "name": "generatedtrx",
       "type": "generated_transaction",
-      "key_names": [
-        "sender",
-        "sender_id"
-      ]
+      "key_names": ["sender", "sender_id"]
     },
     {
       "name": "protocolst",
@@ -2123,33 +1981,22 @@
     {
       "name": "permission",
       "type": "permission",
-      "key_names": [
-        "owner",
-        "name"
-      ]
+      "key_names": ["owner", "name"]
     },
     {
       "name": "permlink",
       "type": "permission_link",
-      "key_names": [
-        "account",
-        "code",
-        "message_type"
-      ]
+      "key_names": ["account", "code", "message_type"]
     },
     {
       "name": "rsclimits",
       "type": "resource_limits",
-      "key_names": [
-        "owner"
-      ]
+      "key_names": ["owner"]
     },
     {
       "name": "rscusage",
       "type": "resource_usage",
-      "key_names": [
-        "owner"
-      ]
+      "key_names": ["owner"]
     },
     {
       "name": "rsclimitsst",

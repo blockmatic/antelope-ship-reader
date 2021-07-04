@@ -5,8 +5,6 @@ import { StaticPool } from 'node-worker-threads-pool'
 import PQueue from 'p-queue'
 import WebSocket from 'ws'
 
-// TODO: Perhaps it would be better to leverage existing types from https://github.com/EOSIO/eosjs/blob/master/src/eosjs-serialize.ts
-
 export type EosioReaderState = {
   chain_id: string | null
   socket: WebSocket | null
