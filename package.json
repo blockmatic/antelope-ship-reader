@@ -1,6 +1,6 @@
 {
   "name": "@blockmatic/eosio-ship-reader",
-  "version": "0.3.1",
+  "version": "0.4.0",
   "description": "Reactive multi-threaded EOSIO state reader for NodeJS",
   "repository": "git@github.com:blockmatic/eosio-ship-reader.git",
   "author": "blockmatic.io",
@@ -39,6 +39,7 @@
     "@blockmatic/eslint-config": "^2.0.0",
     "@blockmatic/prettier-config": "^2.0.0",
     "@blockmatic/tsconfig": "^2.0.0",
+    "@types/lodash.omit": "^4.5.6",
     "@types/node": "^16.0.0",
     "@types/text-encoding": "^0.0.36",
     "@types/ws": "^7.4.6",
@@ -55,6 +56,7 @@
     "@eosrio/node-abieos": "^2.1.1",
     "@types/node-fetch": "^2.5.10",
     "eosjs": "^22.0.0",
+    "lodash.omit": "^4.5.0",
     "node-fetch": "^2.6.1",
     "node-worker-threads-pool": "1.4.3",
     "p-queue": "6.6.2",

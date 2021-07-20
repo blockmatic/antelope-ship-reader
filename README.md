@@ -2,7 +2,9 @@
 
 `eosio-ship-reader` is a multi-threaded reactive eosio state reader written in typescript using on rxjs and `worker_threads`.
 
-This package allows you to subscribe to JSON streams of EOSIO state data and events in NodeJS applications whitout dealing with all the complexity. By connecting to the EOSIO State History websocket and deserializing it's binary messages using nodejs worker_threads to parellalize execution we are able to achieve performance required to build real-time services.
+This package allows you to subscribe to JSON streams of EOSIO state data and events in NodeJS applications. By connecting to the EOSIO State History websocket and deserializing it's binary messages using nodejs worker_threads to parellalize execution we are able to achieve performance required to build real-time services.
+
+By default it is streams `signed_block` data.
 
 _This is project is still on it's alpha state, you can reach us out on telegram for more information_
 
@@ -13,6 +15,10 @@ https://t.me/blockmatic
 The Application Binary Interface (ABI) is a JSON-based description on how to convert user actions between their JSON and Binary representations. The ABI also describes how to convert the database state to/from JSON. Once you have described your contract via an ABI then developers and users will be able to interact with your contract seamlessly via JSON.
 
 [Understanding ABI - EOSIO Developers](https://developers.eos.io/welcome/latest/getting-started/smart-contract-development/understanding-ABI-files)
+
+## EOSIO Transactions Protocol
+
+https://developers.eos.io/welcome/v2.0/protocol/transactions_protocol
 
 ## Demux Pattern
 

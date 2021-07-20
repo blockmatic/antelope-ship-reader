@@ -7,3 +7,4 @@ abi.json
 
 .env*
 !.env.example
+__dev/
