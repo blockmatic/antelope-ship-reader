@@ -128,7 +128,6 @@ export interface EosioReaderActionStreamData extends EosioReaderAction {
   chain_id: string
   block_num: number
   block_id: string
-  transaction_id: string
 }
 
 export interface EosioReaderTransactionStreamData extends EosioReaderTransaction {
@@ -139,6 +138,7 @@ export interface EosioReaderTransactionStreamData extends EosioReaderTransaction
 }
 
 export interface EosioReaderAction<T = { [key: string]: any } | string> {
+  transaction_id: string
   account: string
   name: string
   authorization: Array<{ actor: string; permission: string }>

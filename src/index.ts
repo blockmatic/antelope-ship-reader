@@ -257,6 +257,7 @@ export const createEosioShipReader = async (config: EosioReaderConfig) => {
           if (!whitelistedAction) return
 
           deserializedActions.push({
+            transaction_id: id,
             global_sequence: action_trace.receipt[1]?.global_sequence, // does this make sense ? - Gabo
             receipt: action_trace.receipt[1],
             ...action_trace.act,
@@ -275,7 +276,6 @@ export const createEosioShipReader = async (config: EosioReaderConfig) => {
         deserializedActionsData.forEach((actionData: any, index: number) => {
           deserializedActions[index].data = actionData
           actions$.next({
-            transaction_id: id,
             chain_id: state.chain_id!,
             block_id,
             block_num,
