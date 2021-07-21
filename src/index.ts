@@ -329,8 +329,11 @@ export const createEosioShipReader = async (config: EosioReaderConfig) => {
         type: 'signed_block_variant',
         data: deserializedShipMessage.block,
       })
-      block.timestamp = deserializedBlock.timestamp
-      block.producer = deserializedBlock.producer
+
+      console.log('========== deserializedBlock ==========')
+      console.log(deserializedBlock)
+      block.timestamp = deserializedBlock[1].timestamp
+      block.producer = deserializedBlock[1].producer
     } else if (state.shipRequest.fetch_block) {
       log$.next({ message: `Block #${deserializedShipMessage.this_block.block_num} does not contain block data` })
     }
