@@ -6,7 +6,7 @@ import { DeserializeAbieosParams, DeserializeEosjsParams, DeserializerParams, De
 
 // NOTE: you need use function instead of arrow here in the deserializer, see Nodejs worker_threads documentation
 export function deserializeAbieos({ code, data, type }: DeserializeAbieosParams) {
-  console.log({ code, data, type })
+  //  console.log({ code, data, type })
   return data === 'string' ? nodeAbieos.hex_to_json(code, type, data) : nodeAbieos.bin_to_json(code, type, Buffer.from(data))
 }
 
@@ -25,7 +25,9 @@ function processDeserializationRequest({ code, data, type, table, action }: Dese
   const args: DeserializerWorkerData = workerData
   // get the correct abi and types for table deserialization
   const deserializationAbi = args.abis.get(code)
-  if (!deserializationAbi) return parentPort!.postMessage({ success: false, message: 'Deserialization ABI not found' })
+  if (!deserializationAbi) {
+    return parentPort!.postMessage({ success: false, message: `Deserialization ABI not found for contract ${code}` })
+  }
 
   let deserializationType = type
   if (table) {

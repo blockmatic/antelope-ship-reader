@@ -1,3 +1,4 @@
+/* eslint-disable no-use-before-define */
 export type ShipTransactionTrace = [
   'transaction_trace_v0',
   {

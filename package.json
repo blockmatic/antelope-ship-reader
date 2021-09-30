@@ -1,6 +1,6 @@
 {
   "name": "@blockmatic/eosio-ship-reader",
-  "version": "0.4.3",
+  "version": "0.4.4",
   "description": "Reactive multi-threaded EOSIO state reader for NodeJS",
   "repository": "git@github.com:blockmatic/eosio-ship-reader.git",
   "author": "blockmatic.io",
@@ -14,7 +14,8 @@
   ],
   "scripts": {
     "dev": "scripts/dev",
-    "build": "rimraf dist && tsc",
+    "build": "rimraf dist && tsc -b",
+    "watch": "rimraf dist && tsc -b -w",
     "lint": "eslint --ignore-path .gitignore \"**/*.+(js|ts|tsx)\"",
     "format": "prettier --ignore-path .gitignore --write \"**/*.+(js|json|ts|tsx)\"",
     "dist": "node dist/examples",

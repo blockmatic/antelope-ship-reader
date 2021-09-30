@@ -155,7 +155,11 @@ export const createEosioShipReader = async (config: EosioReaderConfig) => {
   }
 
   const deserializeDeltas = async (data: Uint8Array, block: any): Promise<any> => {
-    const deltas = await deserializeParallel({ code: 'eosio', type: 'table_delta[]', data })
+    const deltas = await deserializeParallel({
+      code: 'eosio',
+      type: 'table_delta[]',
+      data,
+    })
 
     const processed: Array<[any, Array<EosioReaderTableRow>]> = await Promise.all(
       deltas.map(async (delta: any) => {
@@ -185,7 +189,11 @@ export const createEosioShipReader = async (config: EosioReaderConfig) => {
                 if (deserializedRowData[0] !== 'contract_row_v0') return { ...row, data: deserializedRowData }
 
                 // TODO: send array to deserializer, not one by one.
-                const [tableRow, whitelisted] = await deserializeTableRow({ block, row, deserializedRowData })
+                const [tableRow, whitelisted] = await deserializeTableRow({
+                  block,
+                  row,
+                  deserializedRowData,
+                })
 
                 // TODO: this push might be better inside deserializeTableRow
                 if (whitelisted) {
@@ -310,17 +318,25 @@ export const createEosioShipReader = async (config: EosioReaderConfig) => {
 
     // TODO: support all versions
     if (type === 'get_blocks_result_v0') {
-      log$.next({ message: 'Not supported message received', data: { type, deserializedShipMessage } })
+      log$.next({
+        message: 'Not supported message received',
+        data: { type, deserializedShipMessage },
+      })
       return
     }
 
     if (!deserializedShipMessage?.this_block) {
-      log$.next({ message: 'this_block is missing in eosio ship deserializedShipMessage' })
+      log$.next({
+        message: 'this_block is missing in eosio ship deserializedShipMessage',
+      })
       return
     }
 
     // deserialize blocks, transaction traces and table deltas
-    const block: EosioReaderBlock = { chain_id: state.chain_id, ...deserializedShipMessage.this_block }
+    const block: EosioReaderBlock = {
+      chain_id: state.chain_id,
+      ...deserializedShipMessage.this_block,
+    }
 
     // deserialize signed blocks
     if (deserializedShipMessage.block) {
@@ -332,7 +348,9 @@ export const createEosioShipReader = async (config: EosioReaderConfig) => {
       block.timestamp = deserializedBlock[1].timestamp
       block.producer = deserializedBlock[1].producer
     } else if (state.shipRequest.fetch_block) {
-      log$.next({ message: `Block #${deserializedShipMessage.this_block.block_num} does not contain block data` })
+      log$.next({
+        message: `Block #${deserializedShipMessage.this_block.block_num} does not contain block data`,
+      })
     }
 
     if (deserializedShipMessage.traces) {
@@ -349,27 +367,35 @@ export const createEosioShipReader = async (config: EosioReaderConfig) => {
       block.actions = actions
       block.transactions = transactions
     } else if (state.shipRequest.fetch_traces) {
-      log$.next({ message: `Block #${deserializedShipMessage.this_block.block_num} does not contain transaction traces` })
+      log$.next({
+        message: `Block #${deserializedShipMessage.this_block.block_num} does not contain transaction traces`,
+      })
     }
 
     if (deserializedShipMessage.deltas) {
       const [, tableRows] = await deserializeDeltas(deserializedShipMessage.deltas, deserializedShipMessage.this_block)
       block.table_rows = tableRows
     } else if (state.shipRequest.fetch_deltas) {
-      log$.next({ message: `Block #${deserializedShipMessage.this_block.block_num} does not contain deltas` })
+      log$.next({
+        message: `Block #${deserializedShipMessage.this_block.block_num} does not contain deltas`,
+      })
     }
 
     // Push microfork events
     if (deserializedShipMessage.this_block <= state.lastBlock) {
       forks$.next(deserializedShipMessage.this_block)
-      log$.next({ message: `Chain fork detected at block ${deserializedShipMessage.this_block}` })
+      log$.next({
+        message: `Chain fork detected at block ${deserializedShipMessage.this_block}`,
+      })
     }
 
     // Push block data
     blocks$.next(block)
 
     state.lastBlock = deserializedShipMessage.this_block.block_num
-    log$.next({ message: `Processed block ${deserializedShipMessage.this_block.block_num}` })
+    log$.next({
+      message: `Processed block ${deserializedShipMessage.this_block.block_num}`,
+    })
   }
 
   // ========================= eosio-ship-reader "effects" ===================================
@@ -391,7 +417,10 @@ export const createEosioShipReader = async (config: EosioReaderConfig) => {
     state.abis.set('eosio', eosioAbi)
 
     // initialize deserialization worker threads once abi is ready
-    log$.next({ message: 'Initializing deserialization worker pool', data: { ds_threads: config.ds_threads } })
+    log$.next({
+      message: 'Initializing deserialization worker pool',
+      data: { ds_threads: config.ds_threads },
+    })
     state.deserializationWorkers = new StaticPool({
       size: config.ds_threads,
       task: `${__dirname}/../dist/deserializer.js`,
