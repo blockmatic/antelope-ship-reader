@@ -6,7 +6,7 @@ import {
   EosioReaderTableRowFilter,
   ShipTableDeltaName,
 } from '../src'
-import { eosioHost, fecthAbi, getInfo, eosioApi } from './utils'
+import { eosioHost, fetchAbi, getInfo, eosioApi } from './utils'
 
 const table_rows_whitelist: () => EosioReaderTableRowFilter[] = () => [
   { code: 'eosio.token', table: 'accounts' },
@@ -28,7 +28,7 @@ const actions_whitelist: () => EosioReaderActionFilter[] = () => [
 export const loadReader = async () => {
   const info = await getInfo()
   const uniqueContractNames = [...new Set(table_rows_whitelist().map((row) => row.code))]
-  const abisArr = await Promise.all(uniqueContractNames.map((account_name) => fecthAbi(account_name)))
+  const abisArr = await Promise.all(uniqueContractNames.map((account_name) => fetchAbi(account_name)))
 
   const contract_abis: () => EosioReaderAbisMap = () => {
     const numap = new Map()
