@@ -163,7 +163,7 @@ export const createEosioShipReader = async (config: EosioReaderConfig) => {
 
     const processed: Array<[any, Array<EosioReaderTableRow>]> = await Promise.all(
       deltas.map(async (delta: any) => {
-        if (delta[0] !== 'table_delta_v1') throw Error(`Unsupported table delta type received ${delta[0]}`)
+        // if (delta[0] !== 'table_delta_v1') throw Error(`Unsupported table delta type received ${delta[0]}`)
         const tableRows: EosioReaderTableRow[] = []
 
         // only process whitelisted deltas, return if not in delta_whitelist
@@ -318,11 +318,11 @@ export const createEosioShipReader = async (config: EosioReaderConfig) => {
 
     // TODO: support all versions
     if (type === 'get_blocks_result_v0') {
-      log$.next({
-        message: 'Not supported message received',
-        data: { type, deserializedShipMessage },
-      })
-      return
+      // log$.next({
+      //   message: 'Not supported message received',
+      //   data: { type, deserializedShipMessage },
+      // })
+      // return
     }
 
     if (!deserializedShipMessage?.this_block) {
@@ -430,7 +430,7 @@ export const createEosioShipReader = async (config: EosioReaderConfig) => {
       },
     })
 
-    const serializedRequest = serialize('request', ['get_blocks_request_v1', state.shipRequest], state.eosioTypes)
+    const serializedRequest = serialize('request', ['get_blocks_request_v0', state.shipRequest], state.eosioTypes)
     state.socket!.send(serializedRequest)
   })
 
@@ -471,3 +471,4 @@ export const createEosioShipReader = async (config: EosioReaderConfig) => {
     log$,
   }
 }
+
