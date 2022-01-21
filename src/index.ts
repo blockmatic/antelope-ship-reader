@@ -339,46 +339,52 @@ export const createEosioShipReader = async (config: EosioReaderConfig) => {
     }
 
     // deserialize signed blocks
-    if (deserializedShipMessage.block) {
-      const deserializedBlock = await deserializeParallel({
-        code: 'eosio',
-        type: 'signed_block_variant',
-        data: deserializedShipMessage.block,
-      })
-      block.timestamp = deserializedBlock[1].timestamp
-      block.producer = deserializedBlock[1].producer
-    } else if (state.shipRequest.fetch_block) {
-      log$.next({
-        message: `Block #${deserializedShipMessage.this_block.block_num} does not contain block data`,
-      })
+    if (state.shipRequest.fetch_block) {
+      if (deserializedShipMessage.block) {
+        const deserializedBlock = await deserializeParallel({
+          code: 'eosio',
+          type: 'signed_block_variant',
+          data: deserializedShipMessage.block,
+        })
+        block.timestamp = deserializedBlock[1].timestamp
+        block.producer = deserializedBlock[1].producer
+      } else if (state.shipRequest.fetch_block) {
+        log$.next({
+          message: `Block #${deserializedShipMessage.this_block.block_num} does not contain block data`,
+        })
+      }  
     }
 
-    if (deserializedShipMessage.traces) {
-      const traces = await deserializeParallel({
-        code: 'eosio',
-        type: 'transaction_trace[]',
-        data: deserializedShipMessage.traces,
-      })
-
-      const [transactions, actions] = await deserializeTransactionTraces({
-        transaction_traces: traces,
-        ...deserializedShipMessage.this_block,
-      })
-      block.actions = actions
-      block.transactions = transactions
-    } else if (state.shipRequest.fetch_traces) {
-      log$.next({
-        message: `Block #${deserializedShipMessage.this_block.block_num} does not contain transaction traces`,
-      })
+    if (state.shipRequest.fetch_traces) {
+      if (deserializedShipMessage.traces) {
+        const traces = await deserializeParallel({
+          code: 'eosio',
+          type: 'transaction_trace[]',
+          data: deserializedShipMessage.traces,
+        })
+  
+        const [transactions, actions] = await deserializeTransactionTraces({
+          transaction_traces: traces,
+          ...deserializedShipMessage.this_block,
+        })
+        block.actions = actions
+        block.transactions = transactions
+      } else if (state.shipRequest.fetch_traces) {
+        log$.next({
+          message: `Block #${deserializedShipMessage.this_block.block_num} does not contain transaction traces`,
+        })
+      }
     }
 
-    if (deserializedShipMessage.deltas) {
-      const [, tableRows] = await deserializeDeltas(deserializedShipMessage.deltas, deserializedShipMessage.this_block)
-      block.table_rows = tableRows
-    } else if (state.shipRequest.fetch_deltas) {
-      log$.next({
-        message: `Block #${deserializedShipMessage.this_block.block_num} does not contain deltas`,
-      })
+    if (state.shipRequest.fetch_deltas) {
+      if (deserializedShipMessage.deltas) {
+        const [, tableRows] = await deserializeDeltas(deserializedShipMessage.deltas, deserializedShipMessage.this_block)
+        block.table_rows = tableRows
+      } else if (state.shipRequest.fetch_deltas) {
+        log$.next({
+          message: `Block #${deserializedShipMessage.this_block.block_num} does not contain deltas`,
+        })
+      }
     }
 
     // Push microfork events
