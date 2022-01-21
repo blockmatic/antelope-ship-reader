@@ -447,7 +447,7 @@ export const createEosioShipReader = async (config: EosioReaderConfig) => {
         )
         state.unconfirmedMessages = 0
       }
-    } catch (error) {
+    } catch (error: any) {
       errors$.next(error)
       stop()
     }
