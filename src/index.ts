@@ -352,7 +352,7 @@ export const createEosioShipReader = async (config: EosioReaderConfig) => {
         log$.next({
           message: `Block #${deserializedShipMessage.this_block.block_num} does not contain block data`,
         })
-      }  
+      }
     }
 
     if (state.shipRequest.fetch_traces) {
@@ -362,7 +362,7 @@ export const createEosioShipReader = async (config: EosioReaderConfig) => {
           type: 'transaction_trace[]',
           data: deserializedShipMessage.traces,
         })
-  
+
         const [transactions, actions] = await deserializeTransactionTraces({
           transaction_traces: traces,
           ...deserializedShipMessage.this_block,
