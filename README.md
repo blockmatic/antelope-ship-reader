@@ -1,4 +1,4 @@
-# Reactive Antilope State Reader
+# Reactive Antelope State Reader
 
 `eosio-ship-reader` is a multi-threaded reactive eosio state reader written in typescript using on rxjs and `worker_threads`.
 
