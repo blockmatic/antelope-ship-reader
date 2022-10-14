@@ -18,7 +18,7 @@
     "watch": "rimraf dist && tsc -b -w",
     "lint": "eslint --ignore-path .gitignore \"**/*.+(js|ts|tsx)\"",
     "format": "prettier --ignore-path .gitignore --write \"**/*.+(js|json|ts|tsx)\"",
-    "dist": "node dist/examples",
+    "example": "./scripts/dev",
     "prepare": "yarn run build",
     "prepublishOnly": "yarn run format",
     "preversion": "yarn run lint",

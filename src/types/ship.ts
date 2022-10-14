@@ -149,5 +149,4 @@ export interface EosioShipRequest {
   fetch_block?: boolean
   fetch_traces?: boolean
   fetch_deltas?: boolean
-  fetch_block_header: boolean
 }

@@ -40,7 +40,6 @@ const defaultShipRequest: EosioShipRequest = {
   fetch_block: true,
   fetch_traces: true,
   fetch_deltas: true,
-  fetch_block_header: true,
 }
 
 export const createEosioShipReader = async (config: EosioReaderConfig) => {
@@ -163,7 +162,7 @@ export const createEosioShipReader = async (config: EosioReaderConfig) => {
 
     const processed: Array<[any, Array<EosioReaderTableRow>]> = await Promise.all(
       deltas.map(async (delta: any) => {
-        if (delta[0] !== 'table_delta_v1') throw Error(`Unsupported table delta type received ${delta[0]}`)
+        if (delta[0] !== 'table_delta_v0') throw Error(`Unsupported table delta type received ${delta[0]}`)
         const tableRows: EosioReaderTableRow[] = []
 
         // only process whitelisted deltas, return if not in delta_whitelist
@@ -310,20 +309,11 @@ export const createEosioShipReader = async (config: EosioReaderConfig) => {
   }
 
   const deserializeMessage = async (message: EosioSocketMessage) => {
-    const [type, deserializedShipMessage] = await deserializeParallel({
+    const [_type, deserializedShipMessage] = await deserializeParallel({
       code: 'eosio',
       type: 'result',
       data: message,
     })
-
-    // TODO: support all versions
-    if (type === 'get_blocks_result_v0') {
-      log$.next({
-        message: 'Not supported message received',
-        data: { type, deserializedShipMessage },
-      })
-      return
-    }
 
     if (!deserializedShipMessage?.this_block) {
       log$.next({
@@ -343,11 +333,12 @@ export const createEosioShipReader = async (config: EosioReaderConfig) => {
       if (deserializedShipMessage.block) {
         const deserializedBlock = await deserializeParallel({
           code: 'eosio',
-          type: 'signed_block_variant',
+          type: 'signed_block',
           data: deserializedShipMessage.block,
         })
-        block.timestamp = deserializedBlock[1].timestamp
-        block.producer = deserializedBlock[1].producer
+
+        block.timestamp = deserializedBlock.timestamp
+        block.producer = deserializedBlock.producer
       } else if (state.shipRequest.fetch_block) {
         log$.next({
           message: `Block #${deserializedShipMessage.this_block.block_num} does not contain block data`,
@@ -436,7 +427,7 @@ export const createEosioShipReader = async (config: EosioReaderConfig) => {
       },
     })
 
-    const serializedRequest = serialize('request', ['get_blocks_request_v1', state.shipRequest], state.eosioTypes)
+    const serializedRequest = serialize('request', ['get_blocks_request_v0', state.shipRequest], state.eosioTypes)
     state.socket!.send(serializedRequest)
   })
 
