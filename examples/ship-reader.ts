@@ -46,7 +46,7 @@ export const loadReader = async () => {
   ]
 
   const eosioReaderConfig: EosioReaderConfig = {
-    ws_url: 'ws://54.205.62.160:8080',
+    ws_url: 'ws://34.71.234.102:8080',
     rpc_url: eosioApi,
     ds_threads: 6,
     ds_experimental: false,
