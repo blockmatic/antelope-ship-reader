@@ -45,6 +45,7 @@
     "@types/text-encoding": "^0.0.36",
     "@types/ws": "^7.4.6",
     "all-contributors-cli": "^6.20.0",
+    "denoify": "^1.5.3",
     "eslint": "7",
     "husky": "^7.0.0",
     "lint-staged": "^11.0.0",
