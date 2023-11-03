@@ -379,10 +379,10 @@ export const createEosioShipReader = async (config: EosioReaderConfig) => {
     }
 
     // Push microfork events
-    if (deserializedShipMessage.this_block <= state.lastBlock) {
-      forks$.next(deserializedShipMessage.this_block)
+    if (deserializedShipMessage.this_block.block_num <= state.lastBlock) {
+      forks$.next(deserializedShipMessage.this_block.block_num)
       log$.next({
-        message: `Chain fork detected at block ${deserializedShipMessage.this_block}`,
+        message: `Chain fork detected at block ${deserializedShipMessage.this_block.block_num}`,
       })
     }
 
