@@ -1,3 +1,3 @@
 {
-   "replacer": "bin/customReplacer.mjs"  
+  "replacer": "bin/customReplacer.mjs"
 }

@@ -2,9 +2,9 @@
 
 import { RpcInterfaces } from 'npm:eosjs@22.0.0'
 import { StaticPool } from 'npm:node-worker-threads-pool@1.4.3'
-import PQueueModule from 'npm:p-queue@6.6.2';
-                  const PQueue = PQueueModule.default;
-              
+import PQueueModule from 'npm:p-queue@6.6.2'
+const PQueue = PQueueModule.default
+
 import WebSocket from 'npm:ws@7.5.2'
 import { EosioTypes } from './eosio.ts'
 import { EosioShipRequest, ShipActionReceiptData, ShipTableDeltaName, ShipTransactionTrace } from './ship.ts'

@@ -1,39 +1,34 @@
 const __dirname = (() => {
-    const { url: urlStr } = import.meta;
-    const url = new URL(urlStr);
-    const __filename = (url.protocol === "file:" ? url.pathname : urlStr)
-        .replace(/[/][^/]*$/, '');
+  const { url: urlStr } = import.meta
+  const url = new URL(urlStr)
+  const __filename = (url.protocol === 'file:' ? url.pathname : urlStr).replace(/[/][^/]*$/, '')
 
-    const isWindows = (() => {
+  const isWindows = (() => {
+    let NATIVE_OS: typeof Deno.build.os = 'linux'
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const navigator = (globalThis as any).navigator
+    if (globalThis.Deno != null) {
+      NATIVE_OS = Deno.build.os
+    } else if (navigator?.appVersion?.includes?.('Win') ?? false) {
+      NATIVE_OS = 'windows'
+    }
 
-        let NATIVE_OS: typeof Deno.build.os = "linux";
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const navigator = (globalThis as any).navigator;
-        if (globalThis.Deno != null) {
-            NATIVE_OS = Deno.build.os;
-        } else if (navigator?.appVersion?.includes?.("Win") ?? false) {
-            NATIVE_OS = "windows";
-        }
+    return NATIVE_OS == 'windows'
+  })()
 
-        return NATIVE_OS == "windows";
-
-    })();
-
-    return isWindows ?
-        __filename.split("/").join("\\").substring(1) :
-        __filename;
-})();
+  return isWindows ? __filename.split('/').join('\\').substring(1) : __filename
+})()
 
 import WebSocket, { OpenEvent, CloseEvent, ErrorEvent } from 'npm:ws@7.5.2'
 // @deno-types="https://raw.githubusercontent.com/Soremwar/deno_types/07a52c868823928b792e870a572b24af36a4b665/rxjs/v6.5.5/rxjs.d.ts"
-import { Subject } from "https://cdn.skypack.dev/rxjs@6.6.7";
+import { Subject } from 'https://cdn.skypack.dev/rxjs@6.6.7'
 // @deno-types="https://raw.githubusercontent.com/Soremwar/deno_types/07a52c868823928b792e870a572b24af36a4b665/rxjs/v6.5.5/operators.d.ts"
-import __rxjs_operators_ns from "https://dev.jspm.io/rxjs@6.6.7/operators";
-const { filter } = __rxjs_operators_ns;
+import __rxjs_operators_ns from 'https://dev.jspm.io/rxjs@6.6.7/operators'
+const { filter } = __rxjs_operators_ns
 import { Serialize, RpcInterfaces } from 'npm:eosjs@22.0.0'
-import PQueueModule from 'npm:p-queue@6.6.2';
-                  const PQueue = PQueueModule.default;
-              
+import PQueueModule from 'npm:p-queue@6.6.2'
+const PQueue = PQueueModule.default
+
 import {
   EosioShipRequest,
   EosioReaderConfig,
@@ -55,7 +50,7 @@ import {
 } from './types/index.ts'
 import { serialize } from './serializer.ts'
 import { StaticPool } from 'npm:node-worker-threads-pool@1.4.3'
-import { AbiEos as nodeAbieos } from "../deno_dist/abieos.ts"
+import { AbiEos as nodeAbieos } from '../deno_dist/abieos.ts'
 import fetch from 'npm:node-fetch@2.6.1'
 import omit from 'npm:lodash.omit@4.5.0'
 

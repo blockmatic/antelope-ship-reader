@@ -1,9 +1,15 @@
-import { Buffer } from "node:buffer";
+import { Buffer } from 'node:buffer'
 import { parentPort, workerData } from 'node:worker_threads'
 import { TextDecoder, TextEncoder } from 'npm:text-encoding@0.7.0'
-import { AbiEos as nodeAbieos } from "../deno_dist/abieos.ts"
+import { AbiEos as nodeAbieos } from '../deno_dist/abieos.ts'
 import { Serialize } from 'npm:eosjs@22.0.0'
-import { DeserializeAbieosParams, DeserializeEosjsParams, DeserializerParams, DeserializerWorkerData, EosioTypes } from './types/index.ts'
+import {
+  DeserializeAbieosParams,
+  DeserializeEosjsParams,
+  DeserializerParams,
+  DeserializerWorkerData,
+  EosioTypes,
+} from './types/index.ts'
 
 // NOTE: you need use function instead of arrow here in the deserializer, see Nodejs worker_threads documentation
 export function deserializeAbieos({ code, data, type }: DeserializeAbieosParams) {
