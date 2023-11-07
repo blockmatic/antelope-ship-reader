@@ -91,7 +91,7 @@ When this happens, and happens often, your queryable read databases have to roll
 
 ## Usage
 
-`yarn add @blockmatic/eosio-state-reader`
+`yarn add @blockmatic/eosio-ship-reader`
 
 ```ts
 const info = await fetch(
