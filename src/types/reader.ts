@@ -94,7 +94,7 @@ export interface EosioReaderBlock {
   chain_id: string
   block_num: number
   block_id: string
-	last_irreversible_block_num: number
+  last_irreversible_block_num: number
   last_irreversible_block_id: string
   timestamp: string
   producer: string

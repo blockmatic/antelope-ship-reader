@@ -324,9 +324,9 @@ export const createEosioShipReader = async (config: EosioReaderConfig) => {
 
     // deserialize blocks, transaction traces and table deltas
     const block: EosioReaderBlock = {
-      chain_id: state.chain_id,			
-			last_irreversible_block_num: deserializedShipMessage.last_irreversible.block_num,
-			last_irreversible_block_id: deserializedShipMessage.last_irreversible.block_id,		
+      chain_id: state.chain_id,
+      last_irreversible_block_num: deserializedShipMessage.last_irreversible.block_num,
+      last_irreversible_block_id: deserializedShipMessage.last_irreversible.block_id,
       ...deserializedShipMessage.this_block,
     }
 
@@ -460,7 +460,7 @@ export const createEosioShipReader = async (config: EosioReaderConfig) => {
     start,
     stop,
     blocks$,
-		transactions$,
+    transactions$,
     rows$,
     actions$,
     abis$,
