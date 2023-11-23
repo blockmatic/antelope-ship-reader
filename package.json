@@ -1,6 +1,6 @@
 {
   "name": "@blockmatic/eosio-ship-reader",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Reactive multi-threaded EOSIO state reader for NodeJS",
   "repository": "git@github.com:blockmatic/eosio-ship-reader.git",
   "author": "blockmatic.io",
