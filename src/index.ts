@@ -430,7 +430,7 @@ export const createEosioShipReader = async (config: EosioReaderConfig) => {
     })
 
     const serializedRequest = serialize('request', ['get_blocks_request_v0', state.shipRequest], state.eosioTypes)
-    if (state.socket.readyState>0) state.socket.send(serializedRequest);
+    if (state.socket && state.socket.readyState > 0) state.socket.send(serializedRequest)
   })
 
   serializedMessages$.subscribe(async (message: EosioSocketMessage) => {
