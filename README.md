@@ -6,10 +6,6 @@ This package allows you to subscribe to JSON streams of EOSIO state data and eve
 
 By default it is streams `signed_block` data.
 
-_This is project is still on it's alpha state, you can reach us out on telegram for more information_
-
-https://t.me/blockmatic
-
 ## Understanding ABIs
 
 The Application Binary Interface (ABI) is a JSON-based description on how to convert user actions between their JSON and Binary representations. The ABI also describes how to convert the database state to/from JSON. Once you have described your contract via an ABI then developers and users will be able to interact with your contract seamlessly via JSON.
