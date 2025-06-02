@@ -1,7 +1,7 @@
 import { RpcInterfaces } from 'eosjs'
 import fetch from 'node-fetch'
 
-export const eosioApi = 'https://eos.blockmatic.io'
+export const eosioApi = 'https://api.np.animus.is'
 
 export const getInfo = () => fetch(`${eosioApi}/v1/chain/get_info`).then((res: any) => res.json())
 
